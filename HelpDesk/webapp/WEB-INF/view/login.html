@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<link href="/resources/css/bootstrap.css" rel="stylesheet" id="bootstrap-css">
+<head>
+    <meta charset="UTF-8">
+    <title>Authentication</title>
+</head>
+<body>
+<div class="error" th:if="${param.error}"
+     th:with="errorMsg=${session['SPRING_SECURITY_LAST_EXCEPTION'].message}">
+    Reason: <span th:text="${errorMsg}">Wrong input!</span>
+</div>
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="text-center">Welcome</h1>
+        </div>
+        <div class="modal-body">
+            <form name="f" action="/login" method="post">
+                <div class="form-group">
+                    <input name="email" type="email" class="form-control input-lg" placeholder="Email"
+                           required pattern="^[^.@].*[^.@]$"/>
+                </div>
+                <div class="form-group">
+                    <input name="password" type="password" class="form-control input-lg" placeholder="Password"
+                           required />
+                </div>
+                <div class="form-group">
+                    <input type="submit" class="btn btn-block btn-lg btn-primary" value="Login"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

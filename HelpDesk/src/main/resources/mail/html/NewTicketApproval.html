@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HelpDesk</title>
+</head>
+<body>
+<h4>Dear Managers,</h4>
+<div>
+    <span>New ticket </span>
+    <a th:href="@{http://localhost:8099/HelpDesk/tickets/{id}(id=${id})}" th:text="${id}"></a>
+    <span>is waiting for your approval </span>
+</div>
+</body>
+</html>
