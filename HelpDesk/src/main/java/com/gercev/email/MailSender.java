@@ -1,7 +1,6 @@
 package com.gercev.email;
 
 import com.gercev.domain.User;
-import com.gercev.exception.MailSenderException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -36,7 +35,7 @@ public class MailSender {
 
         ExecutorService emailExecutorService = Executors.newSingleThreadExecutor();
         emailExecutorService.execute(() -> {
-            for (User user : recipients) {
+            recipients.forEach(user -> {
                 try {
                     context.setVariable("user", user);
                     helper.setSubject(emailTemplate.getSubject());
@@ -46,9 +45,9 @@ public class MailSender {
                     helper.setText(htmlContext, true);
                     this.mailSender.send(mimeMessage);
                 } catch (MessagingException e) {
-                    throw new MailSenderException();
+                    e.printStackTrace();
                 }
-            }
+            });
         });
     }
 }

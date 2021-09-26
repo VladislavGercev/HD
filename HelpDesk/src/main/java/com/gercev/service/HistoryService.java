@@ -12,65 +12,79 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
 public class HistoryService {
+    private static final String TICKET_IS_CREATED = "Ticket is created";
+    private static final String TICKET_IS_EDITED = "Ticket is edited";
+    private static final String TICKET_STATUS_IS_CHANGED = "Ticket status is changed";
+    private static final String FILE_IS_ATTACHED = "File is attached";
+    private static final String FILE_IS_REMOVED = "File is removed";
 
     @Autowired
     private HistoryRepository historyRepository;
 
-    public History getHistoryById(long historyId) {
+    public Optional<History> getHistoryById(long historyId) {
         return historyRepository.getHistoryById(historyId);
     }
 
-    public List<History> getHistoriesByTicketId(long ticketId) {
+    public Optional<List<History>> getHistoriesByTicketId(long ticketId) {
         return historyRepository.getHistoryByTicketId(ticketId);
     }
 
-    public Long addCreateTicketHistory(Ticket ticket, User user) {
+    public Optional<Long> addCreateTicketHistory(Ticket ticket, User user) {
         return historyRepository.addHistory(
                 prepareHistory(ticket, user,
-                        "Ticket is created",
-                        "Ticket is created"));
+                        TICKET_IS_CREATED,
+                        TICKET_IS_CREATED));
     }
 
-    public Long addEditTicketHistory(Ticket ticket, User user) {
+    public boolean addTicketEditHistory(Ticket ticket, User user) {
         if (ticket.getState() == State.NEW) {
             addStatusChangedHistory(ticket, user);
+            return true;
+        } else {
+            historyRepository.addHistory(
+                    prepareHistory(ticket, user,
+                            TICKET_IS_EDITED,
+                            TICKET_IS_EDITED));
+            return true;
         }
-        return historyRepository.addHistory(
-                prepareHistory(ticket, user,
-                        "Ticket is edited",
-                        "Ticket is edited"));
     }
 
-    public Long addUpdateTicketStatusHistory(Ticket ticket, User user,State stateFrom, State stateTo) {
+
+    public Optional<Long> addUpdateTicketStatusHistory(Ticket ticket, User user, State stateFrom, State stateTo) {
         return historyRepository.addHistory(
                 prepareHistory(ticket, user,
-                        "Ticket status is changed",
-                        String.format("Ticket status is changed from '%s' to '%s'", stateFrom.name(), stateTo.name())));
+                        TICKET_STATUS_IS_CHANGED,
+                        String.format(TICKET_STATUS_IS_CHANGED +
+                                " from '%s' to '%s'", stateFrom.name(), stateTo.name())));
     }
 
     private void addStatusChangedHistory(Ticket ticket, User user) {
         historyRepository.addHistory(
                 prepareHistory(ticket, user,
-                        "Ticket status is changed",
-                        "Ticket status is changed from 'DRAFT' to 'NEW'"));
+                        TICKET_STATUS_IS_CHANGED,
+                        TICKET_STATUS_IS_CHANGED
+                                + " from 'DRAFT' to 'NEW'"));
     }
 
     public void addAttachment(Attachment attachment) {
         historyRepository.addHistory(
                 prepareHistory(attachment,
-                        "File is attached",
-                        String.format("File is attached: %s", attachment.getName())));
+                        FILE_IS_ATTACHED,
+                        String.format(FILE_IS_ATTACHED
+                                + " : %s", attachment.getName())));
     }
 
     public void removeAttachment(Attachment attachment) {
         historyRepository.addHistory(
                 prepareHistory(attachment,
-                        "File is removed",
-                        String.format("File is removed: %s", attachment.getName())));
+                        FILE_IS_REMOVED,
+                        String.format(FILE_IS_REMOVED
+                                + " : %s", attachment.getName())));
     }
 
     private History prepareHistory(Ticket ticket, User user, String action, String description) {

@@ -1,5 +1,6 @@
 package com.gercev.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gercev.domain.enums.Role;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -32,14 +33,17 @@ public class User {
     private String password;
 
     @OneToMany(targetEntity = Comment.class, mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
     @Fetch(value = FetchMode.SUBSELECT)
     private List<Comment> comments;
 
     @OneToMany(targetEntity = Feedback.class, mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     @Fetch(value = FetchMode.SUBSELECT)
     private List<Feedback> feedbacks;
 
     @OneToMany(targetEntity = Comment.class, mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     @Fetch(value = FetchMode.SUBSELECT)
     private List<History> histories;
 

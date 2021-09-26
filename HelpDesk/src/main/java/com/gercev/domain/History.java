@@ -12,21 +12,21 @@ public class History{
     @Column(nullable = false)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private LocalDate date;
 
-    @Column
+    @Column(nullable = false)
     private String action;
 
     @Column
     private String description;
 
     @ManyToOne
-    @JoinColumn(name="ticket")
+    @JoinColumn(name="ticket", nullable = false)
     private Ticket ticket;
 
     @ManyToOne
-    @JoinColumn(name="user")
+    @JoinColumn(name="user", nullable = false)
     private User user;
 
     public History() {

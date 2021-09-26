@@ -69,7 +69,6 @@ class TicketContainer extends React.Component {
       .then((response) => {
         this.setState({ histories: response.data });
       });
-      console.log( this.props.match.params.id)
     axios
       .get(
         "http://localhost:8099/HelpDesk/tickets/" +
@@ -78,6 +77,7 @@ class TicketContainer extends React.Component {
         JSON.parse(localStorage.AuthHeader)
       )
       .then((response) => {
+        console.log(response.data);
         this.setState({ comments: response.data });
       });
     axios
@@ -88,6 +88,7 @@ class TicketContainer extends React.Component {
         JSON.parse(localStorage.AuthHeader)
       )
       .then((resp) => {
+        console.log(resp.data);
         this.setState({ attachments: resp.data });
       });
     axios
@@ -98,9 +99,9 @@ class TicketContainer extends React.Component {
         JSON.parse(localStorage.AuthHeader)
       )
       .then((resp) => {
-       if(resp.data.id != undefined){
-         this.setState({feedback: resp.data})
-       }
+        if (resp.data.id != undefined) {
+          this.setState({ feedback: resp.data });
+        }
       });
   }
 
@@ -109,7 +110,7 @@ class TicketContainer extends React.Component {
     var name = e.target.name;
     let url =
       "http://localhost:8099/HelpDesk/tickets/" +
-      this.ticketId +
+      this.props.match.params.id +
       "/attachments/" +
       id;
     fetch(url, JSON.parse(localStorage.AuthHeader)).then((responce) => {
@@ -128,7 +129,7 @@ class TicketContainer extends React.Component {
   toFeedback() {
     history.push("/tickets/" + this.props.match.params.id + "/feedback/");
   }
-  toFeedbackNew(){
+  toFeedbackNew() {
     history.push("/tickets/" + this.props.match.params.id + "/feedback/new");
   }
 

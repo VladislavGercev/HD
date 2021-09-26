@@ -22,10 +22,10 @@ public class UserService {
         return userRepository.getUserByEmail(email);
     }
 
-    public List<User> getManagers(){
+    public Optional<List<User>> getManagers(){
         return userRepository.getManagers();
     }
-    public List<User> getEngineers(){
+    public Optional<List<User>> getEngineers(){
         return userRepository.getEngineers();
     }
 

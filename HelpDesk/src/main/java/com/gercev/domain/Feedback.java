@@ -12,21 +12,21 @@ public class Feedback{
     @Column(nullable = false)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private byte rate;
 
-    @Column
+    @Column(nullable = false)
     private LocalDate date;
 
     @Column
     private String text;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "user",nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "ticket",nullable = false)
     private Ticket ticket;
 
     public Feedback() {

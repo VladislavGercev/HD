@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 public class AttachmentController {
     @Autowired
@@ -18,23 +21,28 @@ public class AttachmentController {
     @Autowired
     private AttachmentConverter attachmentConverter;
 
-    @PostMapping(value = "tickets/{id}/attachments")
-    public ResponseEntity<TicketDto> addAttachmentsByTicketId(@RequestParam(name = "files") CommonsMultipartFile[] files,
-                                                              @PathVariable Long id) {
-        attachmentService.saveByTicketId(files, id);
-        return new ResponseEntity(HttpStatus.CREATED);
+    @GetMapping(value = "tickets/{ticketId}/attachments/{id}")
+    public ResponseEntity<?> getAttachment(@PathVariable("id") Long attachmentId) {
+        Optional<Attachment> attachmentOptional = attachmentService.getAttachmentById(attachmentId);
+        return attachmentOptional.isPresent() ?
+                ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment: filename-\"" + attachmentOptional.get().getName() + "\"").body(attachmentOptional.get().getBlob())
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = "tickets/{ticketId}/attachments/{id}")
-    public ResponseEntity getAttachment(@PathVariable Long id) {
-        Attachment attachment = attachmentService.getAttachmentById(id);
-        return ResponseEntity.ok().header(HttpHeaders.LINK,
-                "attachment: filename-\"" + attachment.getName() + "\"").body(attachment.getBlob());
+    @PostMapping(value = "tickets/{id}/attachments")
+    public ResponseEntity<TicketDto> addAttachmentsByTicketId(@RequestParam(name = "files") CommonsMultipartFile[] files, @PathVariable("id") Long ticketId) {
+        return attachmentService.addAttachment(files, ticketId)
+                ? new ResponseEntity<>(HttpStatus.CREATED)
+                : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping(value = "tickets/{id}/attachments")
-    public ResponseEntity getAttachmentsByTicketId(@PathVariable Long id) {
-        return ResponseEntity.ok(attachmentService.getAttachmentsByTicketId(id).stream()
-                .map(attachmentConverter::convert).toArray());
+    public ResponseEntity<?> getAttachmentsByTicketId(@PathVariable("id") Long ticketId) {
+        Optional<List<Attachment>> attachmentsOptional = attachmentService.getAttachmentsByTicketId(ticketId);
+        return attachmentsOptional.map(attachments -> ResponseEntity.ok(attachments
+                .stream()
+                .map(attachmentConverter::convert)
+                .toArray())).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }

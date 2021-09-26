@@ -6,6 +6,7 @@ import com.gercev.domain.Ticket;
 import com.gercev.dto.TicketDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class TicketConverter {
             try {
                 ticketDto = objectMapper.readValue(ticketJson, TicketDto.class);
             } catch (IOException e) {
-                System.out.println("Exception");
+                throw new IllegalArgumentException("It is not possible to convert JSON");
             }
         }
         return ticketDto;

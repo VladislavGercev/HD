@@ -16,28 +16,28 @@ public class Ticket {
     @Column(nullable = false)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
     @Column
     private String description;
 
-    @Column
+    @Column(nullable = false)
     private LocalDate createdOn;
 
     @Column
     private LocalDate desiredResolutionDate;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column
+    @Column(nullable = false)
     private State state;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column
+    @Column(nullable = false)
     private Urgency urgency;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "assignee")
     private User assignee;
 
     @ManyToOne

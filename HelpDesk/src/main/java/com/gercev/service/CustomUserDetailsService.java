@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.jws.soap.SOAPBinding;
 import java.util.Optional;
 
 @Service
@@ -30,12 +29,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<User> userOptional = userService.getByEmail(email);
-        User user = userOptional.get();
-        if (user != null) {
+        if (userOptional.isPresent()) {
             return org.springframework.security.core.userdetails.User
                     .withUsername(email)
-                    .password(user.getPassword())
-                    .roles(user.getRole().toString()).build();
+                    .password(userOptional.get().getPassword())
+                    .roles(userOptional.get().getRole().toString()).build();
         } else {
             throw new UserNotFoundException(email + "NotFound");
         }

@@ -24,7 +24,7 @@ public class FeedbackRepository {
         }
     }
 
-    public long addFeedback(Feedback feedback) {
-        return (long) sessionFactory.getCurrentSession().save(feedback);
+    public Optional<Long> addFeedback(Feedback feedback) {
+        return Optional.of((long) sessionFactory.getCurrentSession().save(feedback));
     }
 }

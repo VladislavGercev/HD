@@ -21,18 +21,19 @@ public class FeedbackController {
     public FeedbackConverter feedbackConverter;
 
     @GetMapping("/tickets/{id}/feedback")
-    public ResponseEntity getFeedback(@PathVariable long id) {
-        Optional<Feedback> feedback = feedbackService.getFeedbackByTicketId(id);
-        if(feedback.isPresent()){
-            return ResponseEntity.ok(feedbackConverter.convert(feedback.get()));
-        }
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> getFeedback(@PathVariable("id") long ticketId) {
+        Optional<Feedback> feedbackOptional = feedbackService.getFeedbackByTicketId(ticketId);
+        return feedbackOptional
+                .map(value -> ResponseEntity.ok(feedbackConverter.convert(value)))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
 
     @PostMapping("/tickets/{id}/feedback")
-    public ResponseEntity addFeedback(@PathVariable long id, @RequestBody FeedbackDto feedbackDTO, Principal principal) {
-        return ResponseEntity.ok(
-                feedbackService
-                        .addFeedback(feedbackConverter.convert(feedbackDTO), principal.getName(), id));
+    public ResponseEntity<?> addFeedback(@PathVariable("id") long ticketId, @RequestBody FeedbackDto feedbackDTO, Principal principal) {
+        Optional<Long> feedbackIdOptional = feedbackService
+                .addFeedback(feedbackConverter.convert(feedbackDTO), principal.getName(), ticketId);
+        return feedbackIdOptional.isPresent()
+                ? new ResponseEntity<>(HttpStatus.CREATED)
+                : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

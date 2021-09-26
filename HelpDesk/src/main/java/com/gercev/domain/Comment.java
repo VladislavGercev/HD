@@ -1,5 +1,7 @@
 package com.gercev.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
@@ -10,16 +12,17 @@ public class Comment{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private LocalDate date;
 
-    @Column
+    @Column(nullable = false)
     private String text;
 
     @ManyToOne
-    @JoinColumn(name="ticket")
+    @JoinColumn(name="ticket", nullable = false)
     private Ticket ticket;
 
     @ManyToOne

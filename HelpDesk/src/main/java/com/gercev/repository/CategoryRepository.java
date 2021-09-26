@@ -4,7 +4,8 @@ import com.gercev.domain.Category;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Repository
 public class CategoryRepository {
@@ -12,8 +13,8 @@ public class CategoryRepository {
     @Autowired
     public SessionFactory sessionFactory;
 
-    public long addCategory(Category category){
-         return (long)sessionFactory.getCurrentSession().save(category);
+    public Optional<Long> addCategory(Category category){
+         return Optional.of((Long) sessionFactory.getCurrentSession().save(category));
     }
 
 }

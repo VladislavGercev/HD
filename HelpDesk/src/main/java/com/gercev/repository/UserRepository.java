@@ -1,6 +1,5 @@
 package com.gercev.repository;
 
-import com.gercev.domain.Feedback;
 import com.gercev.domain.User;
 import com.gercev.domain.enums.Role;
 import org.hibernate.SessionFactory;
@@ -16,11 +15,8 @@ public class UserRepository {
     private SessionFactory sessionFactory;
 
     public Optional<User> getUserByEmail(String email) {
-//        return (User) sessionFactory.getCurrentSession()
-//                .createQuery("from User where email = :email")
-//                .setParameter("email", email).uniqueResult();
         try {
-            return   Optional.of((User) sessionFactory.getCurrentSession()
+            return Optional.of((User) sessionFactory.getCurrentSession()
                     .createQuery("FROM User WHERE email = :email")
                     .setParameter("email", email)
                     .uniqueResult());
@@ -29,15 +25,15 @@ public class UserRepository {
         }
     }
 
-    public List<User> getManagers() {
-        return (List<User>) sessionFactory.getCurrentSession()
+    public Optional<List<User>> getManagers() {
+        return Optional.of(sessionFactory.getCurrentSession()
                 .createQuery("FROM User WHERE role = :role")
-                .setParameter("role", Role.MANAGER).getResultList();
+                .setParameter("role", Role.MANAGER).getResultList());
     }
 
-    public List<User> getEngineers() {
-        return (List<User>) sessionFactory.getCurrentSession()
+    public Optional<List<User>> getEngineers() {
+        return Optional.of(sessionFactory.getCurrentSession()
                 .createQuery("FROM User WHERE role = :role")
-                .setParameter("role", Role.ENGINEER).getResultList();
+                .setParameter("role", Role.ENGINEER).getResultList());
     }
 }

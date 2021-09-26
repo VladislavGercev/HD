@@ -10,7 +10,7 @@ public class Category{
     @Column(nullable = false)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
     public Category() {

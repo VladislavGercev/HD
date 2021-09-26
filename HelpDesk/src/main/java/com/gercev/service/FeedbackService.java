@@ -26,14 +26,21 @@ public class FeedbackService {
         return feedbackRepository.getFeedbackByTicketId(feedbackId);
     }
 
-    public Feedback addFeedback(Feedback feedback, String email, long ticketId) {
+    public Optional<Long> addFeedback(Feedback feedback, String email, long ticketId) {
         Optional<User> userOptional = userService.getByEmail(email);
-        User user = userOptional.get();
-        Ticket ticket = ticketService.getTicketById(ticketId);
-        feedback.setUser(user);
-        feedback.setTicket(ticket);
-        feedback.setDate(LocalDate.now());
-        feedback.setId(feedbackRepository.addFeedback(feedback));
-        return feedback;
+        Optional<Ticket> ticketOptional = ticketService.getTicketById(ticketId);
+        if (userOptional.isPresent() && ticketOptional.isPresent()) {
+            feedback.setUser(userOptional.get());
+            feedback.setTicket(ticketOptional.get());
+            feedback.setDate(LocalDate.now());
+            Optional<Long> feedbackIdOptional = feedbackRepository.addFeedback(feedback);
+            if (feedbackIdOptional.isPresent()) {
+                feedback.setId(feedbackIdOptional.get());
+                return feedbackIdOptional;
+            } else {
+                return Optional.empty();
+            }
+        }
+        return Optional.empty();
     }
 }

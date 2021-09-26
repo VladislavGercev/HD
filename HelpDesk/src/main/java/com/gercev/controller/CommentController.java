@@ -2,17 +2,17 @@ package com.gercev.controller;
 
 import com.gercev.converter.CommentConverter;
 import com.gercev.domain.Comment;
-import com.gercev.domain.User;
 import com.gercev.dto.CommentDto;
 import com.gercev.service.CommentService;
 import com.gercev.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 public class CommentController {
@@ -27,16 +27,19 @@ public class CommentController {
     public CommentConverter commentConverter;
 
     @GetMapping("/tickets/{id}/comments")
-    public ResponseEntity getHistoriesById(Principal principal, @PathVariable String id) {
-        List<Comment> comments = commentService.getCommentsByTicketId(Long.parseLong(id));
-        List<CommentDto> commentDtos = comments.stream().map(commentConverter::convert).collect(Collectors.toList());
-
-        return ResponseEntity.ok(commentDtos);
+    public ResponseEntity<?> getCommentsByTicketId(@PathVariable("id") Long ticketId) {
+        Optional<List<Comment>> commentsOptional = commentService.getCommentsByTicketId(ticketId);
+        return commentsOptional.map(comments -> ResponseEntity.ok(comments
+                .stream()
+                .map(commentConverter::convert).toArray()))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/tickets/{id}/comments")
-    public ResponseEntity addComment(Principal principal, @RequestBody CommentDto commentDTO) {
-        return ResponseEntity.ok(commentConverter.convert(
-                commentService.addComment(commentConverter.convert(commentDTO), principal.getName())));
+    public ResponseEntity<?> addCommentForTicket(Principal principal, @RequestBody CommentDto commentDTO, @PathVariable("id") Long ticketId) {
+        Optional<Comment> commentOptional = commentService.addComment(commentConverter.convert(commentDTO), ticketId, principal.getName());
+        return commentOptional.isPresent()
+                ? new ResponseEntity<>(commentConverter.convert(commentOptional.get()), HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

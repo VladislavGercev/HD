@@ -22,7 +22,7 @@ class History extends React.Component {
           <tbody>
           {this?.props?.histories?.map((history) => (
             <tr>
-              <td>{history.date.dayOfMonth  + '/' + history.date.dayOfMonth + '/' + history.date.year}</td>
+              <td>{history.date.dayOfMonth  + '/' + history.date.monthValue + '/' + history.date.year}</td>
               <td>{history.user.firstName +"  "+ history.user.lastName}</td>
               <td>{history.action}</td>
               <td>{history.description}</td>

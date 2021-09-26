@@ -22,7 +22,7 @@ class Comment extends React.Component {
                 <td>
                   {comment.date.dayOfMonth +
                     "/" +
-                    comment.date.dayOfMonth +
+                    comment.date.monthValue +
                     "/" +
                     comment.date.year}
                 </td>

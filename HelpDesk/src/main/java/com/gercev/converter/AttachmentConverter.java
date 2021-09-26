@@ -2,7 +2,6 @@ package com.gercev.converter;
 
 import com.gercev.domain.Attachment;
 import com.gercev.dto.AttachmentDto;
-import com.gercev.service.TicketService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class HistoryRepository {
@@ -13,16 +14,17 @@ public class HistoryRepository {
     @Autowired
     private SessionFactory sessionFactory;
 
-    public History getHistoryById(long historyId) {
-        return (History) sessionFactory.getCurrentSession().createQuery("FROM History WHERE id=:id")
+    public Optional<History> getHistoryById(long historyId) {
+        return (Optional<History>) sessionFactory.getCurrentSession().createQuery("FROM History WHERE id=:id")
                 .setParameter("id", historyId).getSingleResult();
     }
-    public List<History> getHistoryByTicketId(long ticketId) {
-        return  sessionFactory.getCurrentSession().createQuery("FROM History WHERE ticket.id=:id")
-                .setParameter("id", ticketId).getResultList();
+
+    public Optional<List<History>> getHistoryByTicketId(long ticketId) {
+        return Optional.ofNullable(sessionFactory.getCurrentSession().createQuery("FROM History WHERE ticket.id=:id")
+                .setParameter("id", ticketId).getResultList());
     }
 
-    public long addHistory(History history){
-         return (long) sessionFactory.getCurrentSession().save(history);
+    public Optional<Long> addHistory(History history) {
+        return Optional.of((Long) sessionFactory.getCurrentSession().save(history));
     }
 }
