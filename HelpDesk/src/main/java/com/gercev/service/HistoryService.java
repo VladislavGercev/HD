@@ -6,6 +6,7 @@ import com.gercev.domain.Ticket;
 import com.gercev.domain.User;
 import com.gercev.domain.enums.State;
 import com.gercev.repository.HistoryRepository;
+import com.gercev.util.builder.HistoryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,22 +89,20 @@ public class HistoryService {
     }
 
     private History prepareHistory(Ticket ticket, User user, String action, String description) {
-        History history = new History();
-        history.setDate(LocalDate.now());
-        history.setTicket(ticket);
-        history.setUser(user);
-        history.setDescription(action);
-        history.setAction(description);
-        return history;
+        return new HistoryBuilder().setDate(LocalDate.now())
+                .setTicket(ticket)
+                .setUser(user)
+                .setDescription(description)
+                .setAction(action)
+                .build();
     }
 
     private History prepareHistory(Attachment attachment, String action, String description) {
-        History history = new History();
-        history.setDate(LocalDate.now());
-        history.setTicket(attachment.getTicket());
-        history.setUser(attachment.getTicket().getOwner());
-        history.setAction(action);
-        history.setDescription(description);
-        return history;
+        return new HistoryBuilder().setDate(LocalDate.now())
+                .setTicket(attachment.getTicket())
+                .setUser(attachment.getTicket().getOwner())
+                .setDescription(description)
+                .setAction(action)
+                .build();
     }
 }

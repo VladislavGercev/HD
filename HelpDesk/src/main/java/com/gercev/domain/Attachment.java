@@ -25,6 +25,13 @@ public class Attachment{
     public Attachment() {
     }
 
+    public Attachment(Long id, byte[] blob, String name, Ticket ticket) {
+        this.id = id;
+        this.blob = blob;
+        this.name = name;
+        this.ticket = ticket;
+    }
+
     public Long getId() {
         return id;
     }

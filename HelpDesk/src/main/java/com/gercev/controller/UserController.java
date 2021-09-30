@@ -22,7 +22,7 @@ public class UserController {
     private UserConverter userConverter;
 
     @PostMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser(Principal principal) {
+    public ResponseEntity<?> getCurrentUser(Principal principal) {
         Optional<User> userOptional = userService.getByEmail(principal.getName());
         return userOptional
                 .map(user -> ResponseEntity.ok(userConverter.convert(user)))

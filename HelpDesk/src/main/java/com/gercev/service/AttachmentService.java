@@ -3,6 +3,7 @@ package com.gercev.service;
 import com.gercev.domain.Attachment;
 import com.gercev.domain.Ticket;
 import com.gercev.repository.AttachmentRepository;
+import com.gercev.util.builder.AttachmentBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,10 +28,11 @@ public class AttachmentService {
         if (files != null && ticketOptional.isPresent()) {
             for (CommonsMultipartFile aFile : files) {
                 if (!fileVerification(aFile)) {
-                    Attachment attachment = new Attachment();
-                    attachment.setName(aFile.getOriginalFilename());
-                    attachment.setBlob(aFile.getBytes());
-                    attachment.setTicket(ticketOptional.get());
+                    Attachment attachment = new AttachmentBuilder()
+                            .setName(aFile.getOriginalFilename())
+                            .setBlob(aFile.getBytes())
+                            .setTicket(ticketOptional.get())
+                            .builder();
                     attachmentRepository.addAttachment(attachment);
                     historyService.addAttachment(attachment);
                 }

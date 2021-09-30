@@ -64,8 +64,10 @@ public class    TicketController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> editTicket(Principal principal, @RequestBody TicketDto ticketDTO) {
-        return ticketService.update(principal.getName(), ticketConverter.convert(ticketDTO))
+    public ResponseEntity<?> editTicket(@RequestParam(value = "files", required = false) CommonsMultipartFile[] files,
+                                        @RequestParam(value = "ticketDTO",required = false) String ticketJson, Principal principal){
+        TicketDto ticketDto = new TicketDto();
+        return ticketService.update(principal.getName(), ticketConverter.convert(ticketDto))
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -73,7 +75,6 @@ public class    TicketController {
     @PutMapping("/{id}/{state}")
     public ResponseEntity<?> changeTicketState(Principal principal, @PathVariable("id") Long ticketId,
                                                @PathVariable("state") State state) {
-
        return ticketService.changeTicketState(ticketId, state, principal.getName())
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);

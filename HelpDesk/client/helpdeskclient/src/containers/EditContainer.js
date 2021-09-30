@@ -121,8 +121,9 @@ class EditContainer extends React.Component {
     for (let i of this.state.attachments) {
       formData.append("files", i.blob, i.name);
     }
-    axios.post(
-      "http://localhost:8099/HelpDesk/tickets",
+    console.log(formData)
+    axios.put(
+      "http://localhost:8099/HelpDesk/tickets/"+ this.state.ticketId,
       formData,
       JSON.parse(localStorage.AuthHeader)
     );

@@ -5,6 +5,7 @@ import com.gercev.domain.Attachment;
 import com.gercev.dto.TicketDto;
 import com.gercev.service.AttachmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class AttachmentController {
     }
 
     @PostMapping(value = "tickets/{id}/attachments")
-    public ResponseEntity<TicketDto> addAttachmentsByTicketId(@RequestParam(name = "files") CommonsMultipartFile[] files, @PathVariable("id") Long ticketId) {
+    public ResponseEntity<?> addAttachmentsByTicketId(@RequestParam(name = "files") CommonsMultipartFile[] files, @PathVariable("id") Long ticketId) {
         return attachmentService.addAttachment(files, ticketId)
                 ? new ResponseEntity<>(HttpStatus.CREATED)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
