@@ -73,10 +73,12 @@ class CreateTicketContainer extends React.Component {
       user: JSON.parse(localStorage.User),
     };
     var formData = new FormData();
-    formData.append("ticketDTO", JSON.stringify(ticket));
+    formData.append("ticketDto", JSON.stringify(ticket));
     for (let i of this.state.attachments) {
       formData.append("files", i.blob, i.name);
     }
+    console.log(formData)
+    console.log(ticket)
     axios.post(
       "http://localhost:8099/HelpDesk/tickets",
       formData,

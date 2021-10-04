@@ -26,14 +26,14 @@ public class UserRepository {
     }
 
     public Optional<List<User>> getManagers() {
-        return Optional.of(sessionFactory.getCurrentSession()
-                .createQuery("FROM User WHERE role = :role")
-                .setParameter("role", Role.MANAGER).getResultList());
+            return Optional.ofNullable(sessionFactory.getCurrentSession()
+                    .createQuery("FROM User WHERE role = :role")
+                    .setParameter("role", Role.MANAGER).getResultList());
     }
 
     public Optional<List<User>> getEngineers() {
-        return Optional.of(sessionFactory.getCurrentSession()
-                .createQuery("FROM User WHERE role = :role")
-                .setParameter("role", Role.ENGINEER).getResultList());
+            return Optional.ofNullable(sessionFactory.getCurrentSession()
+                    .createQuery("FROM User WHERE role = :role")
+                    .setParameter("role", Role.ENGINEER).getResultList());
     }
 }

@@ -17,6 +17,7 @@ public class FeedbackController {
 
     @Autowired
     public FeedbackService feedbackService;
+
     @Autowired
     public FeedbackConverter feedbackConverter;
 
@@ -30,10 +31,10 @@ public class FeedbackController {
 
     @PostMapping("/tickets/{id}/feedback")
     public ResponseEntity<?> addFeedback(@PathVariable("id") long ticketId, @RequestBody FeedbackDto feedbackDTO, Principal principal) {
-        Optional<Long> feedbackIdOptional = feedbackService
+        Optional<Feedback> feedbackOptional = feedbackService
                 .addFeedback(feedbackConverter.convert(feedbackDTO), principal.getName(), ticketId);
-        return feedbackIdOptional.isPresent()
-                ? new ResponseEntity<>(HttpStatus.CREATED)
+        return feedbackOptional.isPresent()
+                ? new ResponseEntity<>(feedbackConverter.convert(feedbackOptional.get()), HttpStatus.CREATED)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

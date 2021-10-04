@@ -21,7 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("tickets")
-public class    TicketController {
+public class TicketController {
 
     @Autowired
     private TicketService ticketService;
@@ -56,18 +56,25 @@ public class    TicketController {
 
     @PostMapping
     public ResponseEntity<?> addTicket(@RequestParam(value = "files", required = false) CommonsMultipartFile[] files,
-                                       @RequestParam(value = "ticketDTO") String ticketJson, Principal principal) {
-        Optional<Long> ticketIdOptional = ticketService.addTicket(ticketConverter.convert(ticketJson), files, principal.getName());
-        return ticketIdOptional.isPresent()
-                ? ResponseEntity.ok(ticketIdOptional.get())
+                                       @RequestParam(value = "ticketDto") String ticketJson, Principal principal) {
+        Optional<Ticket> ticketOptional = ticketService.addTicket(ticketConverter.convert(ticketJson), files, principal.getName());
+        return ticketOptional.isPresent()
+                ? new ResponseEntity<>(ticketConverter.convert(ticketOptional.get()), HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+//    @PutMapping("/{id}")
+//    public ResponseEntity<?> editTicket(@RequestParam(value = "files", required = false) CommonsMultipartFile[] files,
+//                                        @RequestParam(value = "ticketDto",required = false) String ticketJson, Principal principal) {
+//        return ticketService.updateTicket(principal.getName(), ticketConverter.convert(ticketJson))
+//                ? new ResponseEntity<>(HttpStatus.OK)
+//                : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//    }
+
+
     @PutMapping("/{id}")
-    public ResponseEntity<?> editTicket(@RequestParam(value = "files", required = false) CommonsMultipartFile[] files,
-                                        @RequestParam(value = "ticketDTO",required = false) String ticketJson, Principal principal){
-        TicketDto ticketDto = new TicketDto();
-        return ticketService.update(principal.getName(), ticketConverter.convert(ticketDto))
+    public ResponseEntity<?> editTicket(@RequestBody String ticketJson, Principal principal) {
+        return ticketService.updateTicket(principal.getName(), ticketConverter.convert(ticketJson))
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -75,7 +82,7 @@ public class    TicketController {
     @PutMapping("/{id}/{state}")
     public ResponseEntity<?> changeTicketState(Principal principal, @PathVariable("id") Long ticketId,
                                                @PathVariable("state") State state) {
-       return ticketService.changeTicketState(ticketId, state, principal.getName())
+        return ticketService.updateTicketState(ticketId, state, principal.getName())
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }

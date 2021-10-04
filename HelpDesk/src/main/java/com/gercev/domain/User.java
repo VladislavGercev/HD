@@ -121,4 +121,21 @@ public class User {
     public void setHistories(List<History> histories) {
         this.histories = histories;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) &&
+                Objects.equals(lastName, user.lastName) && role == user.role &&
+                Objects.equals(email, user.email) && Objects.equals(password, user.password) &&
+                Objects.equals(comments, user.comments) && Objects.equals(feedbacks, user.feedbacks) &&
+                Objects.equals(histories, user.histories);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, role, email, password, comments, feedbacks, histories);
+    }
 }

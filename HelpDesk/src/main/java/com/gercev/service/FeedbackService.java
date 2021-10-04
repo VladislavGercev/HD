@@ -3,6 +3,10 @@ package com.gercev.service;
 import com.gercev.domain.Feedback;
 import com.gercev.domain.Ticket;
 import com.gercev.domain.User;
+import com.gercev.domain.enums.State;
+import com.gercev.exception.FeedbackIsNotCreatedException;
+import com.gercev.exception.TicketNotFoundException;
+import com.gercev.exception.UserNotFoundException;
 import com.gercev.repository.FeedbackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,21 +30,23 @@ public class FeedbackService {
         return feedbackRepository.getFeedbackByTicketId(feedbackId);
     }
 
-    public Optional<Long> addFeedback(Feedback feedback, String email, long ticketId) {
-        Optional<User> userOptional = userService.getByEmail(email);
-        Optional<Ticket> ticketOptional = ticketService.getTicketById(ticketId);
-        if (userOptional.isPresent() && ticketOptional.isPresent()) {
-            feedback.setUser(userOptional.get());
-            feedback.setTicket(ticketOptional.get());
+    public Optional<Feedback> addFeedback(Feedback feedback, String email, long ticketId) {
+        User user = userService.getByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found " + email));
+        Ticket ticket = ticketService.getTicketById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException("Ticket " + ticketId + " not found"));
+        if (feedbackValidate(ticket, user)) {
+            feedback.setUser(user);
+            feedback.setTicket(ticket);
             feedback.setDate(LocalDate.now());
-            Optional<Long> feedbackIdOptional = feedbackRepository.addFeedback(feedback);
-            if (feedbackIdOptional.isPresent()) {
-                feedback.setId(feedbackIdOptional.get());
-                return feedbackIdOptional;
-            } else {
-                return Optional.empty();
-            }
+            feedback.setId(feedbackRepository.addFeedback(feedback)
+                    .orElseThrow(() -> new FeedbackIsNotCreatedException("Feedback for ticket " + ticketId + " isn't created")));
+            return Optional.of(feedback);
         }
         return Optional.empty();
+    }
+
+    private boolean feedbackValidate(Ticket ticket, User user) {
+        return ticket.getState() == State.DONE && ticket.getOwner().equals(user);
     }
 }

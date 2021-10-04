@@ -15,16 +15,21 @@ public class HistoryRepository {
     private SessionFactory sessionFactory;
 
     public Optional<History> getHistoryById(long historyId) {
-        return (Optional<History>) sessionFactory.getCurrentSession().createQuery("FROM History WHERE id=:id")
-                .setParameter("id", historyId).getSingleResult();
+       try {
+           return Optional.of((History) sessionFactory.getCurrentSession().createQuery("FROM History WHERE id=:id")
+                   .setParameter("id", historyId).getSingleResult());
+       }catch (Exception e){
+           return Optional.empty();
+       }
     }
 
     public Optional<List<History>> getHistoryByTicketId(long ticketId) {
-        return Optional.ofNullable(sessionFactory.getCurrentSession().createQuery("FROM History WHERE ticket.id=:id")
-                .setParameter("id", ticketId).getResultList());
+           return Optional.ofNullable(sessionFactory.getCurrentSession().createQuery("FROM History WHERE ticket.id=:id")
+                   .setParameter("id", ticketId).getResultList());
+
     }
 
     public Optional<Long> addHistory(History history) {
-        return Optional.of((Long) sessionFactory.getCurrentSession().save(history));
+            return Optional.ofNullable((Long) sessionFactory.getCurrentSession().save(history));
     }
 }

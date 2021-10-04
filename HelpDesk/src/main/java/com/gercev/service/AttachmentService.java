@@ -2,6 +2,8 @@ package com.gercev.service;
 
 import com.gercev.domain.Attachment;
 import com.gercev.domain.Ticket;
+import com.gercev.exception.AttachmentIsNotCreatedException;
+import com.gercev.exception.TicketNotFoundException;
 import com.gercev.repository.AttachmentRepository;
 import com.gercev.util.builder.AttachmentBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,22 +25,25 @@ public class AttachmentService {
     private TicketService ticketService;
 
 
-    public boolean addAttachment(CommonsMultipartFile[] files, Long ticketId) {
-        Optional<Ticket> ticketOptional = ticketService.getTicketById(ticketId);
-        if (files != null && ticketOptional.isPresent()) {
+    public Optional<Long> addAttachment(CommonsMultipartFile[] files, Long ticketId) throws AttachmentIsNotCreatedException {
+        Ticket ticket = ticketService.getTicketById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException("Ticket " + ticketId + " not found"));
+        if (files != null) {
             for (CommonsMultipartFile aFile : files) {
                 if (!fileVerification(aFile)) {
                     Attachment attachment = new AttachmentBuilder()
                             .setName(aFile.getOriginalFilename())
                             .setBlob(aFile.getBytes())
-                            .setTicket(ticketOptional.get())
+                            .setTicket(ticket)
                             .builder();
-                    attachmentRepository.addAttachment(attachment);
+                    attachment.setId(attachmentRepository.addAttachment(attachment)
+                            .orElseThrow(() -> new AttachmentIsNotCreatedException("Attachment for ticket " + ticketId + "isn't created")));
                     historyService.addAttachment(attachment);
+                    return Optional.of(attachment.getId());
                 }
             }
         }
-        return true;
+        return Optional.empty();
     }
 
     private boolean fileVerification(CommonsMultipartFile file) {

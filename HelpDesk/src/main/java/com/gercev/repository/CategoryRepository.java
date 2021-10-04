@@ -14,7 +14,7 @@ public class CategoryRepository {
     public SessionFactory sessionFactory;
 
     public Optional<Long> addCategory(Category category){
-         return Optional.of((Long) sessionFactory.getCurrentSession().save(category));
+            return Optional.ofNullable((Long) sessionFactory.getCurrentSession().save(category));
     }
 
 }

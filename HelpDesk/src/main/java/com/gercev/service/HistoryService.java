@@ -5,6 +5,7 @@ import com.gercev.domain.History;
 import com.gercev.domain.Ticket;
 import com.gercev.domain.User;
 import com.gercev.domain.enums.State;
+import com.gercev.exception.HistoryIsNotCreatedException;
 import com.gercev.repository.HistoryRepository;
 import com.gercev.util.builder.HistoryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,57 +36,73 @@ public class HistoryService {
         return historyRepository.getHistoryByTicketId(ticketId);
     }
 
-    public Optional<Long> addCreateTicketHistory(Ticket ticket, User user) {
-        return historyRepository.addHistory(
-                prepareHistory(ticket, user,
-                        TICKET_IS_CREATED,
-                        TICKET_IS_CREATED));
+    public Optional<History> addCreateTicketHistory(Ticket ticket, User user) {
+        History history = prepareHistory(ticket, user,
+                TICKET_IS_CREATED,
+                TICKET_IS_CREATED);
+        history.setId(historyRepository.addHistory(history)
+                .orElseThrow(() -> new HistoryIsNotCreatedException(
+                        "Create_History for ticket " + ticket.getId() + "isn't created")));
+        return Optional.of(history);
     }
 
-    public boolean addTicketEditHistory(Ticket ticket, User user) {
+    public Optional<History> addTicketEditHistory(Ticket ticket, User user) {
         if (ticket.getState() == State.NEW) {
-            addStatusChangedHistory(ticket, user);
-            return true;
+            return addStatusChangedHistoryFromDraftToNew(ticket, user);
         } else {
-            historyRepository.addHistory(
-                    prepareHistory(ticket, user,
-                            TICKET_IS_EDITED,
-                            TICKET_IS_EDITED));
-            return true;
+            History history = prepareHistory(ticket, user,
+                    TICKET_IS_EDITED,
+                    TICKET_IS_EDITED);
+            history.setId(historyRepository.addHistory(history)
+                    .orElseThrow(() -> new HistoryIsNotCreatedException(
+                            "Ticket_change status History for ticket " + ticket.getId() + " isn't created")));
+            return Optional.of(history);
         }
     }
 
 
-    public Optional<Long> addUpdateTicketStatusHistory(Ticket ticket, User user, State stateFrom, State stateTo) {
-        return historyRepository.addHistory(
-                prepareHistory(ticket, user,
-                        TICKET_STATUS_IS_CHANGED,
-                        String.format(TICKET_STATUS_IS_CHANGED +
-                                " from '%s' to '%s'", stateFrom.name(), stateTo.name())));
+    public Optional<History> addUpdateTicketStatusHistory(Ticket ticket, User user, State stateFrom, State stateTo) {
+        History history = prepareHistory(ticket, user,
+                TICKET_STATUS_IS_CHANGED,
+                String.format(TICKET_STATUS_IS_CHANGED +
+                        " from '%s' to '%s'", stateFrom.name(), stateTo.name()));
+        history.setId(historyRepository.addHistory(history).orElseThrow(() -> new HistoryIsNotCreatedException(
+                "Ticket_change status History for ticket " + ticket.getId() + " isn't created")));
+        return Optional.of(history);
     }
 
-    private void addStatusChangedHistory(Ticket ticket, User user) {
-        historyRepository.addHistory(
-                prepareHistory(ticket, user,
-                        TICKET_STATUS_IS_CHANGED,
-                        TICKET_STATUS_IS_CHANGED
-                                + " from 'DRAFT' to 'NEW'"));
+    private Optional<History> addStatusChangedHistoryFromDraftToNew(Ticket ticket, User user) {
+        History history = prepareHistory(ticket, user,
+                TICKET_STATUS_IS_CHANGED,
+                TICKET_STATUS_IS_CHANGED
+                        + " from 'DRAFT' to 'NEW'");
+        history.setId(historyRepository.addHistory(history)
+                .orElseThrow(() -> new HistoryIsNotCreatedException(
+                        "Ticket_change status History for ticket " + ticket.getId() + " isn't created")));
+        return Optional.of(history);
     }
 
-    public void addAttachment(Attachment attachment) {
-        historyRepository.addHistory(
+    public Optional<History> addAttachment(Attachment attachment) {
+        History history =
                 prepareHistory(attachment,
                         FILE_IS_ATTACHED,
                         String.format(FILE_IS_ATTACHED
-                                + " : %s", attachment.getName())));
+                                + " : %s", attachment.getName()));
+        history.setId(historyRepository.addHistory(history)
+                .orElseThrow(() -> new HistoryIsNotCreatedException(
+                        "Attachment_add History for " + attachment.getName() + " isn't created")));
+        return Optional.of(history);
     }
 
-    public void removeAttachment(Attachment attachment) {
-        historyRepository.addHistory(
-                prepareHistory(attachment,
-                        FILE_IS_REMOVED,
-                        String.format(FILE_IS_REMOVED
-                                + " : %s", attachment.getName())));
+    public Optional<History> removeAttachment(Attachment attachment) {
+        History history = prepareHistory(attachment,
+                FILE_IS_REMOVED,
+                String.format(FILE_IS_REMOVED
+                        + " : %s", attachment.getName()));
+        history.setId(historyRepository.addHistory(history)
+                .orElseThrow(() -> new HistoryIsNotCreatedException(
+                        "Attachment_remove History " + attachment.getName() + " isn't created")));
+        return Optional.of(history);
     }
 
     private History prepareHistory(Ticket ticket, User user, String action, String description) {

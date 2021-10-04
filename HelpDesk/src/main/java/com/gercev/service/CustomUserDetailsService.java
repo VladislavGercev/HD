@@ -16,14 +16,16 @@ import java.util.Optional;
 @Transactional
 public class CustomUserDetailsService implements UserDetailsService {
 
+    @Autowired
     private UserRepository userRepository;
+    @Autowired
     private UserService userService;
 
-    @Autowired
-    public CustomUserDetailsService(UserRepository userRepository, UserService userService) {
-        this.userRepository = userRepository;
-        this.userService = userService;
-    }
+//    @Autowired
+//    public CustomUserDetailsService(UserRepository userRepository, UserService userService) {
+//        this.userRepository = userRepository;
+//        this.userService = userService;
+//    }
 
     @Override
     @Transactional

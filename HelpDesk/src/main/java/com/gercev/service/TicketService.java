@@ -10,6 +10,9 @@ import com.gercev.domain.enums.State;
 import com.gercev.dto.TicketDto;
 import com.gercev.email.EmailTemplate;
 import com.gercev.email.MailSender;
+import com.gercev.exception.TicketIsNotCreatedException;
+import com.gercev.exception.TicketNotFoundException;
+import com.gercev.exception.UserNotFoundException;
 import com.gercev.repository.CategoryRepository;
 import com.gercev.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,21 +51,14 @@ public class TicketService {
     public TicketService() {
     }
 
-    public Optional<Long> addTicket(TicketDto ticketDto, CommonsMultipartFile[] files, String email) {
+    public Optional<Ticket> addTicket(TicketDto ticketDto, CommonsMultipartFile[] files, String email) {
+        User user = userService.getByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email + "NotFound"));
         Ticket ticket = ticketConverter.convert(ticketDto);
-        Optional<User> userOptional = userService.getByEmail(email);
-        if (!userOptional.isPresent()) {
-            return Optional.empty();
-        }
-        User user = userOptional.get();
         ticket.setOwner(user);
         ticket.setCreatedOn(LocalDate.now());
-        Optional<Long> ticketIdOptional = ticketRepository.addTicket(ticket);
-        if (!ticketIdOptional.isPresent()) {
-            return Optional.empty();
-        }
-        ticket.setId(ticketIdOptional.get());
-
+        ticket.setId(ticketRepository.addTicket(ticket)
+                .orElseThrow(() -> new TicketIsNotCreatedException("Ticket isn't created")));
         categoryRepository.addCategory(ticket.getCategory());
         if (files != null) {
             attachmentService.addAttachment(files, ticket.getId());
@@ -70,75 +66,72 @@ public class TicketService {
         Comment comment = commentConverter.convert(ticketDto.getComment());
         commentService.addComment(comment, ticket.getId(), email);
         if (ticket.getState() == State.NEW) {
-            Optional<List<User>> listManagersOptional = userService.getManagers();
-            listManagersOptional.ifPresent(users -> mailSender.sendAcceptableEmail(users, ticket.getId(), EmailTemplate.NEW_TICKET_FOR_APPROVAL));
+            mailSender.sendAcceptableEmail(userService.getManagers()
+                            .orElseThrow(() -> new UserNotFoundException("Managers are not Found")),
+                    ticket.getId(), EmailTemplate.NEW_TICKET_FOR_APPROVAL);
         }
-        return ticketIdOptional;
+        return Optional.of(ticket);
+
     }
 
     public Optional<List<Ticket>> getTicketsByUserRole(String email) {
-        Optional<User> userOptional = userService.getByEmail(email);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            switch (user.getRole()) {
-                case EMPLOYEE:
-                    return ticketRepository.getTicketsByUserId(user.getId());
-                case MANAGER:
-                    return ticketRepository.getTicketsForManager(user.getId());
-                case ENGINEER:
-                    return ticketRepository.getTicketsForAssignee(user.getId());
-                default:
-                    return Optional.empty();
-            }
-        } else return Optional.empty();
-    }
-
-    public boolean update(String email, Ticket ticket) {
-        Optional<User> userOptional = userService.getByEmail(email);
-        if (userOptional.isPresent()) {
-            historyService.addTicketEditHistory(ticket, userOptional.get());
-            return ticketRepository.updateTicket(ticket);
+        User user = userService.getByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email + "NotFound"));
+        switch (user.getRole()) {
+            case EMPLOYEE:
+                return ticketRepository.getTicketsByUserId(user.getId());
+            case MANAGER:
+                return ticketRepository.getTicketsForManager(user.getId());
+            case ENGINEER:
+                return ticketRepository.getTicketsForAssignee(user.getId());
+            default:
+                return Optional.empty();
         }
-        return false;
     }
 
-    public boolean changeTicketState(Long id, State stateTo, String email) {
-        Optional<User> userOptional = userService.getByEmail(email);
-        Optional<Ticket> ticketOptional = ticketRepository.getTicketById(id);
-        if (userOptional.isPresent() && ticketOptional.isPresent()) {
-            User user = userOptional.get();
-            Ticket ticket = ticketOptional.get();
-            State stateFrom = ticket.getState();
-            List<User> recipients = getRecipients(ticket, stateFrom, stateTo);
-            if (checkState(user, ticket, stateTo)) {
-                ticketRepository.updateTicketState(ticket, stateTo);
-                switch (stateTo) {
-                    case NEW:
-                        mailSender.sendAcceptableEmail(recipients, id, EmailTemplate.NEW_TICKET_FOR_APPROVAL);
-                    case APPROVED:
-                        ticketRepository.addApproverForTicket(ticket.getId(), user);
-                        mailSender.sendAcceptableEmail(recipients, id, EmailTemplate.TICKET_WAS_APPROVED);
-                        break;
-                    case CANCELED:
-                        if (stateFrom == State.NEW) {
-                            mailSender.sendAcceptableEmail(recipients, id, EmailTemplate.TICKET_WAS_CANCELLED_MANAGER);
-                        }
-                        if (stateFrom == State.APPROVED) {
-                            mailSender.sendAcceptableEmail(recipients, id, EmailTemplate.TICKET_WAS_CANCELLED_ENGINEER);
-                        }
-                        break;
-                    case DECLINED:
-                        mailSender.sendAcceptableEmail(recipients, id, EmailTemplate.TICKET_WAS_DECLINED);
-                        break;
-                    case IN_PROGRESS:
-                        ticketRepository.addAssigneeForTicket(ticket.getId(), user);
-                        break;
-                    case DONE:
-                        mailSender.sendAcceptableEmail(recipients, id, EmailTemplate.TICKET_WAS_DONE);
-                }
-                historyService.addUpdateTicketStatusHistory(ticket, user, stateFrom, stateTo);
-                return true;
+    public boolean updateTicket(String email, TicketDto ticketDto) {
+        Ticket ticket = ticketConverter.convert(ticketDto);
+        User user = userService.getByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email + "NotFound"));
+        historyService.addTicketEditHistory(ticket, user);
+        return ticketRepository.updateTicket(ticket);
+    }
+
+    public boolean updateTicketState(Long ticketId, State stateTo, String email) {
+        User user = userService.getByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email + "NotFound"));
+        Ticket ticket = ticketRepository.getTicketById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException("Ticket " + ticketId + " not found"));
+        State stateFrom = ticket.getState();
+        List<User> recipients = getRecipients(ticket, stateFrom, stateTo);
+        if (ticketUpdateValidation(ticket, stateTo, user.getRole())) {
+            ticketRepository.updateTicketState(ticket, stateTo);
+            switch (stateTo) {
+                case NEW:
+                    mailSender.sendAcceptableEmail(recipients, ticketId, EmailTemplate.NEW_TICKET_FOR_APPROVAL);
+                case APPROVED:
+                    ticketRepository.addApproverForTicket(ticketId, user);
+                    mailSender.sendAcceptableEmail(recipients, ticketId, EmailTemplate.TICKET_WAS_APPROVED);
+                    break;
+                case CANCELED:
+                    if (stateFrom == State.NEW) {
+                        mailSender.sendAcceptableEmail(recipients, ticketId, EmailTemplate.TICKET_WAS_CANCELLED_MANAGER);
+                    }
+                    if (stateFrom == State.APPROVED) {
+                        mailSender.sendAcceptableEmail(recipients, ticketId, EmailTemplate.TICKET_WAS_CANCELLED_ENGINEER);
+                    }
+                    break;
+                case DECLINED:
+                    mailSender.sendAcceptableEmail(recipients, ticketId, EmailTemplate.TICKET_WAS_DECLINED);
+                    break;
+                case IN_PROGRESS:
+                    ticketRepository.addAssigneeForTicket(ticketId, user);
+                    break;
+                case DONE:
+                    mailSender.sendAcceptableEmail(recipients, ticketId, EmailTemplate.TICKET_WAS_DONE);
             }
+            historyService.addUpdateTicketStatusHistory(ticket, user, stateFrom, stateTo);
+            return true;
         }
         return false;
     }
@@ -149,15 +142,13 @@ public class TicketService {
         User owner = ticket.getOwner();
         switch (stateTo) {
             case NEW:
-                Optional<List<User>> listManagersOptional = userService.getManagers();
-                listManagersOptional.ifPresent(recipients::addAll);
+                recipients.addAll((userService.getManagers()
+                        .orElseThrow(() -> new UserNotFoundException("Managers are not found"))));
                 break;
             case APPROVED:
-                Optional<List<User>> listEngineersOptional = userService.getEngineers();
-                if (listEngineersOptional.isPresent()) {
-                    recipients.addAll(listEngineersOptional.get());
-                    recipients.add(owner);
-                }
+                recipients.addAll(userService.getEngineers()
+                        .orElseThrow(() -> new UserNotFoundException("Engineers are not found")));
+                recipients.add(owner);
                 break;
             case DECLINED:
             case DONE:
@@ -175,57 +166,34 @@ public class TicketService {
         return recipients;
     }
 
-
-    private boolean checkState(User user, Ticket ticket, State stateNew) {
-        boolean result = false;
-        switch (stateNew) {
-            case NEW:
-                if (ticket.getState() == State.DRAFT || ticket.getState() == State.DECLINED) {
-                    if ((user.getRole() == Role.EMPLOYEE || user.getRole() == Role.MANAGER)
-                            && ticket.getOwner().getId() == user.getId()) {
-                        result = true;
-                    }
-                }
-                break;
-            case APPROVED:
-            case DECLINED:
-                if (ticket.getState() == State.NEW) {
-                    if (user.getRole() == Role.MANAGER && ticket.getOwner().getId() != user.getId()) {
-                        result = true;
-                    }
-                }
-                break;
-            case CANCELED:
-                if (ticket.getState() == State.DRAFT || ticket.getState() == State.DECLINED) {
-                    if ((user.getRole() == Role.EMPLOYEE || user.getRole() == Role.MANAGER)
-                            && ticket.getOwner().getId() == user.getId()) {
-                        result = true;
-                    }
-                }
-                if (ticket.getState() == State.NEW) {
-                    if (user.getRole() == Role.MANAGER && ticket.getOwner().getId() != user.getId()) {
-                        result = true;
-                    }
-                }
-                if (ticket.getState() == State.APPROVED) {
-                    if (user.getRole() == Role.ENGINEER) {
-                        result = true;
-                    }
-                }
-            case IN_PROGRESS:
-                if (ticket.getState() == State.APPROVED) {
-                    if (user.getRole() == Role.ENGINEER) {
-                        result = true;
-                    }
-                }
-            case DONE:
-                if (ticket.getState() == State.IN_PROGRESS) {
-                    if (user.getRole() == Role.ENGINEER) {
-                        result = true;
-                    }
-                }
+    private boolean ticketUpdateValidation(Ticket ticket, State state, Role role) {
+        switch (role) {
+            case EMPLOYEE:
+                return ticketUpdateValidationEmployee(ticket, state);
+            case MANAGER:
+                return ticketUpdateValidationManager(ticket, state);
+            case ENGINEER:
+                return ticketUpdateValidationEngineer(ticket, state);
+            default:
+                return false;
         }
-        return result;
+    }
+
+    private boolean ticketUpdateValidationEmployee(Ticket ticket, State state) {
+        return ((ticket.getState() == State.DRAFT || ticket.getState() == State.DECLINED) &&
+                (state == State.NEW || state == State.CANCELED));
+
+    }
+
+    private boolean ticketUpdateValidationManager(Ticket ticket, State state) {
+        return ((ticket.getState() == State.NEW && ticket.getOwner().getRole() == Role.EMPLOYEE)
+                && (state == State.APPROVED || state == State.DECLINED) || state == State.CANCELED);
+    }
+
+    private boolean ticketUpdateValidationEngineer(Ticket ticket, State state) {
+        return ((ticket.getState() == State.APPROVED &&
+                (state == State.IN_PROGRESS || state == State.CANCELED)) ||
+                (ticket.getState() == State.IN_PROGRESS && state == State.DONE));
     }
 
     public Optional<List<Ticket>> getTicketsByUserId(long id) {

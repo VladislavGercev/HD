@@ -22,7 +22,7 @@ public class History{
     private String description;
 
     @ManyToOne
-    @JoinColumn(name="ticket", nullable = false)
+    @JoinColumn(name="ticket")
     private Ticket ticket;
 
     @ManyToOne

@@ -16,16 +16,12 @@ public class CommentRepository {
     private SessionFactory sessionFactory;
 
     public Optional<List<Comment>> getCommentsByTicketId(long ticketId) {
-        try {
             return Optional.ofNullable(sessionFactory.getCurrentSession().createQuery("FROM Comment WHERE ticket.id=:id")
                     .setParameter("id", ticketId).getResultList());
-        }catch (Exception e){
-            return Optional.empty();
-        }
     }
 
     public Optional<Long> addComment(Comment comment) {
-        return Optional.ofNullable((Long) sessionFactory.getCurrentSession()
-                .save(comment));
+            return Optional.ofNullable((Long) sessionFactory.getCurrentSession()
+                    .save(comment));
     }
 }

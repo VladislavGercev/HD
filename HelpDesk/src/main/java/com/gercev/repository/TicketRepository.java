@@ -16,62 +16,66 @@ public class TicketRepository {
     private SessionFactory sessionFactory;
 
     public Optional<List<Ticket>> getAllTickets() {
-        return Optional.of(sessionFactory.getCurrentSession()
-                .createQuery("FROM Ticket")
-                .getResultList());
+            return Optional.ofNullable(sessionFactory.getCurrentSession()
+                    .createQuery("FROM Ticket")
+                    .getResultList());
     }
 
     public Optional<List<Ticket>> getTicketsByUserId(long userId) {
-        return Optional.ofNullable(sessionFactory.getCurrentSession().createQuery("FROM Ticket WHERE owner.id =:ownerId")
-                .setParameter("ownerId", userId)
-                .getResultList());
+            return Optional.ofNullable(sessionFactory.getCurrentSession().createQuery("FROM Ticket WHERE owner.id =:ownerId")
+                    .setParameter("ownerId", userId)
+                    .getResultList());
     }
 
     public Optional<List<Ticket>> getTicketsForApprover(long approverId) {
-        return Optional.of(sessionFactory.getCurrentSession()
-                .createQuery("FROM Ticket WHERE approver.id=:approverId or state in(:approved, :declined, :cancelled, :inProgress, :done) ")
-                .setParameter("approverId", approverId)
-                .setParameter("approved", State.APPROVED)
-                .setParameter("declined", State.DECLINED)
-                .setParameter("cancelled", State.CANCELED)
-                .setParameter("inProgress", State.IN_PROGRESS)
-                .setParameter("done", State.DONE)
-                .getResultList());
+            return Optional.ofNullable(sessionFactory.getCurrentSession()
+                    .createQuery("FROM Ticket WHERE approver.id=:approverId or state in(:approved, :declined, :cancelled, :inProgress, :done) ")
+                    .setParameter("approverId", approverId)
+                    .setParameter("approved", State.APPROVED)
+                    .setParameter("declined", State.DECLINED)
+                    .setParameter("cancelled", State.CANCELED)
+                    .setParameter("inProgress", State.IN_PROGRESS)
+                    .setParameter("done", State.DONE)
+                    .getResultList());
     }
 
 
     public Optional<List<Ticket>> getTicketsForAssignee(long assigneeId) {
-        return Optional.ofNullable(sessionFactory.getCurrentSession()
-                .createQuery("FROM Ticket WHERE assignee.id=:assigneeId and state in(:inProgress, :done)" +
-                        "or (state=:approved)")
-                .setParameter("assigneeId", assigneeId)
-                .setParameter("inProgress", State.IN_PROGRESS)
-                .setParameter("done", State.DONE)
-                .setParameter("approved", State.APPROVED)
-                .getResultList());
+            return Optional.ofNullable(sessionFactory.getCurrentSession()
+                    .createQuery("FROM Ticket WHERE assignee.id=:assigneeId and state in(:inProgress, :done)" +
+                            "or (state=:approved)")
+                    .setParameter("assigneeId", assigneeId)
+                    .setParameter("inProgress", State.IN_PROGRESS)
+                    .setParameter("done", State.DONE)
+                    .setParameter("approved", State.APPROVED)
+                    .getResultList());
     }
 
     public Optional<List<Ticket>> getTicketsForManager(Long userId) {
-        return Optional.ofNullable(sessionFactory.getCurrentSession()
-                .createQuery("FROM Ticket WHERE owner.id=:ownerId " +
-                        "or (state=:new) " +
-                        "or (approver.id=:approverId and state in(:approved, :declined, :cancelled, :inProgress, :done))")
-                .setParameter("ownerId", userId)
-                .setParameter("new", State.NEW)
-                .setParameter("approverId", userId)
-                .setParameter("approved", State.APPROVED)
-                .setParameter("declined", State.DECLINED)
-                .setParameter("cancelled", State.CANCELED)
-                .setParameter("inProgress", State.IN_PROGRESS)
-                .setParameter("done", State.DONE)
-                .getResultList());
+            return Optional.ofNullable(sessionFactory.getCurrentSession()
+                    .createQuery("FROM Ticket WHERE owner.id=:ownerId " +
+                            "or (state=:new) " +
+                            "or (approver.id=:approverId and state in(:approved, :declined, :cancelled, :inProgress, :done))")
+                    .setParameter("ownerId", userId)
+                    .setParameter("new", State.NEW)
+                    .setParameter("approverId", userId)
+                    .setParameter("approved", State.APPROVED)
+                    .setParameter("declined", State.DECLINED)
+                    .setParameter("cancelled", State.CANCELED)
+                    .setParameter("inProgress", State.IN_PROGRESS)
+                    .setParameter("done", State.DONE)
+                    .getResultList());
     }
 
 
     public Optional<Ticket> getTicketById(long ticketId) {
-        return Optional.of((Ticket) sessionFactory.getCurrentSession()
-                .createQuery("FROM Ticket WHERE id=:id").setParameter("id", ticketId)
-                .getSingleResult());
+        try {
+            return Optional.of((Ticket) sessionFactory.getCurrentSession()
+                    .createQuery("FROM Ticket WHERE id=:id").setParameter("id", ticketId)
+                    .getSingleResult());
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public boolean updateTicket(Ticket ticket) {
@@ -124,6 +128,6 @@ public class TicketRepository {
     }
 
     public Optional<Long> addTicket(Ticket ticket) {
-        return Optional.of((long) sessionFactory.getCurrentSession().save(ticket));
+            return Optional.ofNullable((long) sessionFactory.getCurrentSession().save(ticket));
     }
 }

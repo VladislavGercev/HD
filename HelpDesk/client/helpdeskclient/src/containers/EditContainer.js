@@ -15,13 +15,14 @@ class EditContainer extends React.Component {
     this.onHandleChangeAttachment = this.onHandleChangeAttachment.bind(this);
     this.state = {
       ticketId: this.props.match.params.id,
+      state: null,
       category: null,
       name: null,
-      description: null,
       urgency: null,
       desiredResolutionDate: null,
+      description: null,
+      comment: null,
       attachments: [],
-      comment: [],
     };
   }
 
@@ -31,15 +32,6 @@ class EditContainer extends React.Component {
 
   onHandleChange(event) {
     this.setState({ [event.target.name]: event.target.value });
-  }
-
-  newTicket() {
-    this.updateTicket("NEW");
-    history.push("/tickets/");
-  }
-  draftTicket() {
-    this.updateTicket("DRAFT");
-    history.push("/tickets/");
   }
 
   createParams(status) {
@@ -72,7 +64,8 @@ class EditContainer extends React.Component {
         });
       };
       reader.readAsArrayBuffer(files[i]);
-    }console.log(this.state.attachments)
+    }
+    console.log(this.state.attachments);
   }
 
   componentDidMount() {
@@ -104,30 +97,97 @@ class EditContainer extends React.Component {
     });
   }
 
+  newTicket() {
+    this.updateTicket("NEW");
+    history.push("/tickets/");
+  }
+  draftTicket() {
+    this.updateTicket("DRAFT");
+    history.push("/tickets/");
+  }
+
   updateTicket(status) {
     var ticket = {};
+    ticket.id = this.state.ticketId;
     ticket.state = status;
     ticket.category = this.state.category;
     ticket.name = this.state.name;
     ticket.urgency = this.state.urgency;
     ticket.desiredResolutionDate = this.state.desiredResolutionDate;
     ticket.description = this.state.description;
-    ticket.comment = {
-      text: this.state.comment,
-      user: JSON.parse(localStorage.User),
-    };
+    // ticket.comment = {
+    //   text: this.state.comment,
+    //   user: JSON.parse(localStorage.User),
+    // };
     var formData = new FormData();
-    formData.append("ticketDTO", JSON.stringify(ticket));
-    for (let i of this.state.attachments) {
-      formData.append("files", i.blob, i.name);
-    }
-    console.log(formData)
-    axios.put(
-      "http://localhost:8099/HelpDesk/tickets/"+ this.state.ticketId,
-      formData,
-      JSON.parse(localStorage.AuthHeader)
-    );
+    formData.append("ticketDto", JSON.stringify(ticket));
+    axios
+      .put(
+        "http://localhost:8099/HelpDesk/tickets/" + this.state.ticketId,
+        ticket,
+        JSON.parse(localStorage.AuthHeader)
+      )
+      .then((responce) => {
+        if (this.state.comment) {
+          axios
+            .post(
+              "http://localhost:8099/HelpDesk/tickets/" +
+                this.state.ticketId +
+                "/comments",
+              {
+                text: this.state.comment,
+                ticketId: this.state.ticketId,
+              },
+              JSON.parse(localStorage.AuthHeader)
+            )
+            .then((responce) => {});
+        }
+        if (this.state.attachments.length !== 0) {
+          var formData = new FormData();
+          for (let i of this.state.attachments) {
+            formData.append("files", i.blob, i.name);
+          }
+          axios
+            .post(
+              "http://localhost:8099/HelpDesk/tickets/" +
+              this.state.ticketId +
+                "/attachments",
+              formData,
+              JSON.parse(localStorage.AuthHeader)
+            )
+            .then((responce) => {});
+        }
+
+        history.push("/tickets");
+      })
+      .catch((error) => {});
   }
+
+  // updateTicket(status) {
+  //   var ticket = {};
+  //   ticket.state = status;
+  //   ticket.category = this.state.category;
+  //   ticket.name = this.state.name;
+  //   ticket.urgency = this.state.urgency;
+  //   ticket.desiredResolutionDate = this.state.desiredResolutionDate;
+  //   ticket.description = this.state.description;
+  //   ticket.comment = {
+  //     text: this.state.comment,
+  //     user: JSON.parse(localStorage.User),
+  //   };
+  //   var formData = new FormData();
+  //   formData.append("ticketDto", JSON.stringify(ticket));
+  //   for (let i of this.state.attachments) {
+  //     formData.append("files", i.blob, i.name);
+  //   }
+  //   console.log(formData);
+  //   console.log(ticket);
+  //   axios.put(
+  //     "http://localhost:8099/HelpDesk/tickets/" + this.state.ticketId,
+  //     formData,
+  //     JSON.parse(localStorage.AuthHeader)
+  //   );
+  // }
 
   render() {
     return (
@@ -139,8 +199,8 @@ class EditContainer extends React.Component {
         onHandleChange={this.onHandleChange}
         onHandleChangeAttachment={this.onHandleChangeAttachment}
         onDeleteFile={this.onDeleteFile}
-        draftTicket={this.draftTicket} 
-        newTicket={this.newTicket} 
+        draftTicket={this.draftTicket}
+        newTicket={this.newTicket}
       ></EditView>
     );
   }
