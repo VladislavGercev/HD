@@ -17,21 +17,29 @@ import java.util.Optional;
 @RestController
 public class CommentController {
 
-    @Autowired
+
     public UserService userService;
 
-    @Autowired
+
     public CommentService commentService;
 
-    @Autowired
+
     public CommentConverter commentConverter;
+
+    @Autowired
+    public CommentController(UserService userService, CommentService commentService, CommentConverter commentConverter) {
+        this.userService = userService;
+        this.commentService = commentService;
+        this.commentConverter = commentConverter;
+    }
 
     @GetMapping("/tickets/{id}/comments")
     public ResponseEntity<?> getCommentsByTicketId(@PathVariable("id") Long ticketId) {
         Optional<List<Comment>> commentsOptional = commentService.getCommentsByTicketId(ticketId);
         return commentsOptional.map(comments -> ResponseEntity.ok(comments
                 .stream()
-                .map(commentConverter::convert).toArray()))
+                .map(commentConverter::convert)
+                .toArray()))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 

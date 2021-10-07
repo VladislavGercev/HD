@@ -77,7 +77,6 @@ class TicketContainer extends React.Component {
         JSON.parse(localStorage.AuthHeader)
       )
       .then((response) => {
-        console.log(response.data);
         this.setState({ comments: response.data });
       });
     axios
@@ -88,7 +87,6 @@ class TicketContainer extends React.Component {
         JSON.parse(localStorage.AuthHeader)
       )
       .then((resp) => {
-        console.log(resp.data);
         this.setState({ attachments: resp.data });
       });
     axios

@@ -11,11 +11,9 @@ class Tickets extends Component {
     this.onChangeState = this.onChangeState.bind(this);
     this.onAction = this.onAction.bind(this);
     this.logout = this.logout.bind(this);
+
     this.state = {
       user: JSON.parse(localStorage.User),
-      tickets: [],
-      myTickets: [],
-
     };
   }
 
@@ -37,11 +35,12 @@ class Tickets extends Component {
       )
       .then((response) => {
         this.setState({ tickets: response.data });
-        this.getMyTickets();
+        this.getMyTickets()
       });
   }
 
   getMyTickets() {
+    console.log(this.state.user.id)
     var result = [];
     switch (this.state.user.role) {
       case "EMPLOYEE":
@@ -116,7 +115,6 @@ class Tickets extends Component {
         result = "DONE";
         break;
     }
-
     return result;
   }
 
@@ -127,41 +125,13 @@ class Tickets extends Component {
     ticket.state = status;
     var newTickets = this.state.tickets.filter((t) => t.id != ticketId);
     this.setState({ tickets: [...newTickets, ticket] });
-
-    axios
-      .put(
-        "http://localhost:8099/HelpDesk/tickets/" + ticketId + "/" + status,
-        null,
-        JSON.parse(localStorage.AuthHeader)
-      )
-      .then((responce) => {})
-      .catch((error) => {});
+    axios.put(
+      "http://localhost:8099/HelpDesk/tickets/" + ticketId + "/" + status,
+      null,
+      JSON.parse(localStorage.AuthHeader)
+    );
   }
 
-  onMyTickets() {
-    var result = [];
-    switch (this.state.user.role) {
-      case "EMPLOYEE":
-        result = this.state.tickets;
-        break;
-      case "MANAGER":
-        result = this.state.tickets.filter(
-          (t) =>
-            t.owner.id === this.state.user.id ||
-            (t.approver
-              ? t.approver.id === this.state.user.id && t.state === "APPROVED"
-              : false)
-        );
-        break;
-      case "ENGINEER":
-        result = this.state.tickets.filter((t) =>
-          t.assignee ? t.assignee.id === this.state.user.id : false
-        );
-        break;
-    }
-
-    return result;
-  }
   render() {
     return (
       <TicketsView
@@ -171,11 +141,9 @@ class Tickets extends Component {
         myTickets={this.state.myTickets}
         onChangeState={this.onChangeState}
         onChangeAction={this.onChangeAction ? this.onChangeAction : []}
-        onSortId={this.onSortId}
+        getMyTickets={this.getMyTickets}
       ></TicketsView>
     );
   }
-
-
 }
 export default Tickets;

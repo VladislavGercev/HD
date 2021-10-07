@@ -15,63 +15,92 @@ class TicketsTable extends React.Component {
             <tr className="table-active">
               <th>
                 ID
-                <button
-                  className="btn btn-outline-light btn-sm"
-                  onClick={this.props.onSortId}
-                >
-                  <div>
-                    <div class="triangle-up"></div>
-                    <div class="triangle-down"></div>
-                  </div>
-                </button>
+                <div style={{ display: "inline-block" }}>
+                  <div
+                    className="triangle-up"
+                    id="idUp"
+                    onClick={this.props.onSort}
+                  ></div>
+                  <div
+                    className="triangle-down"
+                    id="idDown"
+                    onClick={this.props.onSort}
+                  ></div>
+                </div>
               </th>
               <th>
-                Name{" "}
-                <button className="btn btn-outline-light btn-sm">
-                  <div>
-                    <div class="triangle-up"></div>
-                    <div class="triangle-down"></div>
-                  </div>
-                </button>
+                Name
+                <div style={{ display: "inline-block" }}>
+                  <div
+                    className="triangle-up"
+                    id="nameUp"
+                    onClick={this.props.onSort}
+                  ></div>
+                  <div
+                    className="triangle-down"
+                    id="nameDown"
+                    onClick={this.props.onSort}
+                  ></div>
+                </div>
               </th>
               <th>
                 Desired Date
-                <button className="btn btn-outline-light btn-sm">
-                  <div>
-                    <div class="triangle-up"></div>
-                    <div class="triangle-down"></div>
-                  </div>
-                </button>
+                <div style={{ display: "inline-block" }}>
+                  <div
+                    className="triangle-up"
+                    id="dateUp"
+                    onClick={this.props.onSort}
+                  ></div>
+                  <div
+                    className="triangle-down"
+                    id="dateDown"
+                    onClick={this.props.onSort}
+                  ></div>
+                </div>
               </th>
               <th>
                 Urgency
-                <button className="btn btn-outline-light btn-sm">
-                  <div>
-                    <div class="triangle-up"></div>
-                    <div class="triangle-down"></div>
-                  </div>
-                </button>
+                <div style={{ display: "inline-block" }}>
+                  <div
+                    className="triangle-up"
+                    id="UrgencyUp"
+                    onClick={this.props.onSort}
+                  ></div>
+                  <div
+                    className="triangle-down"
+                    id="UrgencyDown"
+                    onClick={this.props.onSort}
+                  ></div>
+                </div>
               </th>
               <th>
                 Status
-                <button className="btn btn-outline-light btn-sm">
-                  <div>
-                    <div class="triangle-up"></div>
-                    <div class="triangle-down"></div>
-                  </div>
-                </button>
+                <div style={{ display: "inline-block" }}>
+                  <div
+                    className="triangle-up"
+                    id="StatusUp"
+                    onClick={this.props.onSort}
+                  ></div>
+                  <div
+                    className="triangle-down"
+                    id="StatusDown"
+                    onClick={this.props.onSort}
+                  ></div>
+                </div>
               </th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {this.props.tickets.map((ticket) => (
-              <tr>
-                <td>{ticket.id}</td>
+            {this.props.tickets?.map((ticket) => (
+              <tr key={ticket.id}>
+                <td>{ticket.id }</td>
                 <td>
                   <a href={"/tickets/" + ticket.id}>{ticket.name}</a>
                 </td>
-                <td>{ticket.desired_resolution_date}</td>
+                <td>
+                  {ticket.desiredResolutionDate!==null?ticket.desiredResolutionDate[0]+"/" +ticket.desiredResolutionDate[1]+"/"+ticket.desiredResolutionDate[2]:""}
+                </td>
                 <td>{ticket.urgency}</td>
                 <td>{ticket.state}</td>
                 <td>

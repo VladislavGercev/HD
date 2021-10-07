@@ -7,8 +7,8 @@ public class FeedbackDto {
     private byte rate;
     private LocalDate date;
     private String text;
-    private TicketDto ticketDTO;
-    private UserDto userDTO;
+    private TicketDto ticketDto;
+    private UserDto userDto;
 
     public FeedbackDto() {
     }
@@ -20,20 +20,20 @@ public class FeedbackDto {
         this.text = text;
     }
 
-    public UserDto getUserDTO() {
-        return userDTO;
+    public TicketDto getTicketDto() {
+        return ticketDto;
     }
 
-    public void setUserDTO(UserDto userDTO) {
-        this.userDTO = userDTO;
+    public void setTicketDto(TicketDto ticketDto) {
+        this.ticketDto = ticketDto;
     }
 
-    public TicketDto getTicketDTO() {
-        return ticketDTO;
+    public UserDto getUserDto() {
+        return userDto;
     }
 
-    public void setTicketDTO(TicketDto ticketDTO) {
-        this.ticketDTO = ticketDTO;
+    public void setUserDto(UserDto userDto) {
+        this.userDto = userDto;
     }
 
     public Long getId() {

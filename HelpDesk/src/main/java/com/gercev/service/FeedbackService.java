@@ -31,17 +31,21 @@ public class FeedbackService {
     }
 
     public Optional<Feedback> addFeedback(Feedback feedback, String email, long ticketId) {
-        User user = userService.getByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found " + email));
-        Ticket ticket = ticketService.getTicketById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException("Ticket " + ticketId + " not found"));
-        if (feedbackValidate(ticket, user)) {
-            feedback.setUser(user);
-            feedback.setTicket(ticket);
-            feedback.setDate(LocalDate.now());
-            feedback.setId(feedbackRepository.addFeedback(feedback)
-                    .orElseThrow(() -> new FeedbackIsNotCreatedException("Feedback for ticket " + ticketId + " isn't created")));
-            return Optional.of(feedback);
+        try {
+            User user = userService.getByEmail(email)
+                    .orElseThrow(() -> new UserNotFoundException("User not found " + email));
+            Ticket ticket = ticketService.getTicketById(ticketId)
+                    .orElseThrow(() -> new TicketNotFoundException("Ticket " + ticketId + " not found"));
+            if (feedbackValidate(ticket, user)) {
+                feedback.setUser(user);
+                feedback.setTicket(ticket);
+                feedback.setDate(LocalDate.now());
+                feedback.setId(feedbackRepository.addFeedback(feedback)
+                        .orElseThrow(() -> new FeedbackIsNotCreatedException("Feedback for ticket " + ticketId + " isn't created")));
+                return Optional.of(feedback);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return Optional.empty();
     }

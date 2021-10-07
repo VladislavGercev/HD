@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,24 +25,35 @@ public class AttachmentService {
     @Autowired
     private TicketService ticketService;
 
+    public AttachmentService(AttachmentRepository attachmentRepository, HistoryService historyService, TicketService ticketService) {
+        this.attachmentRepository = attachmentRepository;
+        this.historyService = historyService;
+        this.ticketService = ticketService;
+    }
 
-    public Optional<Long> addAttachment(CommonsMultipartFile[] files, Long ticketId) throws AttachmentIsNotCreatedException {
-        Ticket ticket = ticketService.getTicketById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException("Ticket " + ticketId + " not found"));
-        if (files != null) {
-            for (CommonsMultipartFile aFile : files) {
-                if (!fileVerification(aFile)) {
-                    Attachment attachment = new AttachmentBuilder()
-                            .setName(aFile.getOriginalFilename())
-                            .setBlob(aFile.getBytes())
-                            .setTicket(ticket)
-                            .builder();
-                    attachment.setId(attachmentRepository.addAttachment(attachment)
-                            .orElseThrow(() -> new AttachmentIsNotCreatedException("Attachment for ticket " + ticketId + "isn't created")));
-                    historyService.addAttachment(attachment);
-                    return Optional.of(attachment.getId());
+    public Optional<List<Long>> addAttachment(CommonsMultipartFile[] files, Long ticketId) throws AttachmentIsNotCreatedException {
+        try {
+            List<Long> attachmentCreated = new ArrayList<>();
+            Ticket ticket = ticketService.getTicketById(ticketId)
+                    .orElseThrow(() -> new TicketNotFoundException("Ticket " + ticketId + " not found"));
+            if (files != null) {
+                for (CommonsMultipartFile aFile : files) {
+                    if (!fileVerification(aFile)) {
+                        Attachment attachment = new AttachmentBuilder()
+                                .setName(aFile.getOriginalFilename())
+                                .setBlob(aFile.getBytes())
+                                .setTicket(ticket)
+                                .builder();
+                        attachment.setId(attachmentRepository.addAttachment(attachment)
+                                .orElseThrow(() -> new AttachmentIsNotCreatedException("Attachment for ticket " + ticketId + "isn't created")));
+                        historyService.addAttachment(attachment);
+                        attachmentCreated.add(attachment.getId());
+                    }
                 }
+                return Optional.of(attachmentCreated);
             }
+        }catch (Exception e){
+            e.printStackTrace();
         }
         return Optional.empty();
     }
@@ -59,5 +71,9 @@ public class AttachmentService {
 
     public Optional<List<Attachment>> getAttachmentsByTicketId(Long id) {
         return attachmentRepository.getAttachmentsByTicketId(id);
+    }
+
+    public boolean deleteAttachment(Long id) {
+        return attachmentRepository.deleteAttachment(id);
     }
 }

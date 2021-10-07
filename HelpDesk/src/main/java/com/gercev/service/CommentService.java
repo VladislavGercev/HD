@@ -31,15 +31,20 @@ public class CommentService {
     }
 
     public Optional<Comment> addComment(Comment comment, long ticketId, String email) {
-        User user = userService.getByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found " + email));
-        Ticket ticket = ticketService.getTicketById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException("Ticket " + ticketId + " not found"));
-        comment.setUser(user);
-        comment.setTicket(ticket);
-        comment.setDate(LocalDate.now());
-        comment.setId(commentRepository.addComment(comment)
-                .orElseThrow(() -> new CommentIsNotCreatedException("Comment for ticket " + ticketId + "isn't created")));
-        return Optional.of(comment);
+        try {
+            User user = userService.getByEmail(email)
+                    .orElseThrow(() -> new UserNotFoundException("User not found " + email));
+            Ticket ticket = ticketService.getTicketById(ticketId)
+                    .orElseThrow(() -> new TicketNotFoundException("Ticket " + ticketId + " not found"));
+            comment.setUser(user);
+            comment.setTicket(ticket);
+            comment.setDate(LocalDate.now());
+            comment.setId(commentRepository.addComment(comment)
+                    .orElseThrow(() -> new CommentIsNotCreatedException("Comment for ticket " + ticketId + "isn't created")));
+            return Optional.of(comment);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 }

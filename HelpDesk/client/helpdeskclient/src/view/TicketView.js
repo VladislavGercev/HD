@@ -42,7 +42,6 @@ class TicketView extends React.Component {
   }
 
   render() {
-    console.log(this.props.feedback);
     const { toTickets, toEdit, toFeedback, toFeedbackNew } = this.props;
     return (
       <div>
@@ -75,7 +74,7 @@ class TicketView extends React.Component {
                   ></input>
                 )}
               {this.props.feedback === null &&
-                this.props.ticket.state === "NEW" &&
+                this.props.ticket.state === "DONE" &&
                 (this.props.user.role === "MANAGER" ||
                   this.props.user.role === "EMPLOYEE") && (
                   <input
@@ -86,7 +85,7 @@ class TicketView extends React.Component {
                   ></input>
                 )}
               {this.props.feedback !=null &&
-                this.props.ticket.state === "NEW" &&
+                this.props.ticket.state === "DONE" &&
                 (this.props.user.role === "MANAGER" ||
                   this.props.user.role === "EMPLOYEE") && (
                   <input

@@ -12,12 +12,15 @@ class CreateTicketContainer extends React.Component {
     this.newTicket = this.newTicket.bind(this);
     this.draftTicket = this.draftTicket.bind(this);
     this.onHandleChangeAttachment = this.onHandleChangeAttachment.bind(this);
-    this.onDeleteFile = this.onDeleteFile.bind(this)
+    this.onDeleteFile = this.onDeleteFile.bind(this);
+    this.addAttachment = this.addAttachment.bind(this);
+    this.addComment = this.addComment.bind(this);
+    this.onValid = this.onValid.bind(this)
     this.state = {
       state: null,
-      category: null,
+      category: "Application & Services",
       name: null,
-      urgency: null,
+      urgency: "LOW",
       desiredResolutionDate: null,
       description: null,
       comment: null,
@@ -30,7 +33,9 @@ class CreateTicketContainer extends React.Component {
   }
 
   onHandleChange(event) {
-    this.setState({ [event.target.name]: event.target.value });
+    if (this.onValid(event.target)) {
+      this.setState({ [event.target.name]: event.target.value });
+    }
   }
 
   onHandleChangeAttachment(e) {
@@ -49,17 +54,19 @@ class CreateTicketContainer extends React.Component {
         });
       };
       reader.readAsArrayBuffer(files[i]);
-    }console.log(this.state.attachments)
+    }
   }
 
   newTicket() {
     this.createTicket("NEW");
     history.push("/tickets/");
   }
+
   draftTicket() {
     this.createTicket("DRAFT");
     history.push("/tickets/");
   }
+
   createTicket(status) {
     var ticket = {};
     ticket.state = status;
@@ -68,22 +75,50 @@ class CreateTicketContainer extends React.Component {
     ticket.urgency = this.state.urgency;
     ticket.desiredResolutionDate = this.state.desiredResolutionDate;
     ticket.description = this.state.description;
-    ticket.comment = {
-      text: this.state.comment,
-      user: JSON.parse(localStorage.User),
-    };
-    var formData = new FormData();
-    formData.append("ticketDto", JSON.stringify(ticket));
-    for (let i of this.state.attachments) {
-      formData.append("files", i.blob, i.name);
+    axios
+      .post(
+        "http://localhost:8099/HelpDesk/tickets",
+        ticket,
+        JSON.parse(localStorage.AuthHeader)
+      )
+      .then((resp) => {
+        this.addAttachment(resp.data.id);
+        this.addComment(resp.data.id);
+      });
+    history.push("/tickets");
+  }
+
+  addAttachment(id) {
+    if (this.state.attachments != 0) {
+      var formData = new FormData();
+      for (let i of this.state.attachments) {
+        formData.append("files", i.blob, i.name);
+      }
+      axios
+        .post(
+          "http://localhost:8099/HelpDesk/tickets/" +
+            id +
+            "/attachments",
+          formData,
+          JSON.parse(localStorage.AuthHeader)
+        )
+        .then((responce) => {});
+      history.push("/tickets");
     }
-    console.log(formData)
-    console.log(ticket)
-    axios.post(
-      "http://localhost:8099/HelpDesk/tickets",
-      formData,
-      JSON.parse(localStorage.AuthHeader)
-    );
+  }
+
+  addComment(id) {
+    if (this.state.comment != null) {
+      var comment = {
+        text: this.state.comment,
+        user: JSON.parse(localStorage.User),
+      };
+      axios.post(
+        "http://localhost:8099/HelpDesk/tickets/" + id + "/comments",
+        comment,
+        JSON.parse(localStorage.AuthHeader)
+      );
+    }
   }
 
   onDeleteFile(name) {
@@ -106,6 +141,26 @@ class CreateTicketContainer extends React.Component {
         onDeleteFile={this.onDeleteFile}
       ></CreateTicketView>
     );
+  }
+  onValid(data) {
+    let result = false;
+    const isName = /^[-\s"'`~.a-z#!$%@^&*+=_,:;?/<>|()[\]{}]{1,100}$/;
+    const isDescription = /^[-\s"'`~.a-z#!$%@^&*+=_,:;?/<>|()[\]{}]{1,500}$/i;
+    const isText = /^[-\s"'`~.\w#!$%@^&*+=,:;?/<>|()[\]{}]{1,500}$/;
+    switch (data.name) {
+      case "name":
+        result = isName.test(data.value);
+        break;
+      case "description":
+        result = isDescription.test(data.value);
+        break;
+      case "text":
+        result = isText.test(data.value);
+        break;
+      default:
+        result = true;
+    }
+    return result;
   }
 }
 

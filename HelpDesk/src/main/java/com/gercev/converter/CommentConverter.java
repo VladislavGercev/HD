@@ -9,8 +9,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommentConverter {
 
-    @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    public CommentConverter(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+    }
 
     public CommentDto convert(Comment comment) {
         return modelMapper.map(comment, CommentDto.class);

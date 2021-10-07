@@ -13,7 +13,8 @@ class SearchInput extends React.Component {
             name="search"
             class="form-control"
             type="search"
-            onChange={this.props.doFilter}
+            onChange={this.props.onFilter}
+        
           />
         </div>
       </div>

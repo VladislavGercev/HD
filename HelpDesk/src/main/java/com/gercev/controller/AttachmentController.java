@@ -32,11 +32,12 @@ public class AttachmentController {
 
     @PostMapping(value = "tickets/{id}/attachments")
     public ResponseEntity<?> addAttachmentsByTicketId(@RequestParam(name = "files") CommonsMultipartFile[] files, @PathVariable("id") Long ticketId) {
-        Optional<Long> attachmentIdOptional = attachmentService.addAttachment(files, ticketId);
+        Optional<List<Long>> attachmentIdOptional = attachmentService.addAttachment(files, ticketId);
         return attachmentIdOptional.isPresent() ?
                 new ResponseEntity<>(attachmentIdOptional.get(), HttpStatus.CREATED) :
                 new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
 
     @GetMapping(value = "tickets/{id}/attachments")
     public ResponseEntity<?> getAttachmentsByTicketId(@PathVariable("id") Long ticketId) {
@@ -45,5 +46,12 @@ public class AttachmentController {
                 .stream()
                 .map(attachmentConverter::convert)
                 .toArray())).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @DeleteMapping(value = "tickets/{ticketId}/attachments/{id}")
+    public ResponseEntity<?> deleteAttachments(@PathVariable("id") Long attachmentId) {
+        return attachmentService.deleteAttachment(attachmentId)
+                ? new ResponseEntity<>(HttpStatus.CREATED)
+                : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

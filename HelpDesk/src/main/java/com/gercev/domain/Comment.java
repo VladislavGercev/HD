@@ -1,14 +1,13 @@
 package com.gercev.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Objects;
 
 
 @Entity
 @Table
-public class Comment{
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +21,11 @@ public class Comment{
     private String text;
 
     @ManyToOne
-    @JoinColumn(name="ticket", nullable = false)
+    @JoinColumn(name = "ticket", nullable = false)
     private Ticket ticket;
 
     @ManyToOne
-    @JoinColumn(name="user",nullable = false)
+    @JoinColumn(name = "user", nullable = false)
     private User user;
 
     public Comment() {
@@ -72,4 +71,17 @@ public class Comment{
         this.user = user;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Comment comment = (Comment) o;
+        return Objects.equals(id, comment.id) && Objects.equals(date, comment.date) && Objects.equals(text, comment.text)
+                && Objects.equals(ticket, comment.ticket) && Objects.equals(user, comment.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, date, text, ticket, user);
+    }
 }

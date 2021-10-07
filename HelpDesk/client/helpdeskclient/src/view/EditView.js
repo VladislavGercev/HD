@@ -8,7 +8,6 @@ class EditView extends React.Component {
   }
 
   render() {
-    const { onHandleChange, updateTicket, toTicketOverview } = this.props;
     return (
       <div>
         <div className="container">

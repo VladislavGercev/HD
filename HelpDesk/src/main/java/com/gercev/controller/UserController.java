@@ -2,7 +2,6 @@ package com.gercev.controller;
 
 import com.gercev.converter.UserConverter;
 import com.gercev.domain.User;
-import com.gercev.dto.UserDto;
 import com.gercev.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

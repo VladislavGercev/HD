@@ -8,7 +8,7 @@ class FeedbackContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      id:  this.props.match.params.ticketId,
+      id: this.props.match.params.ticketId,
       name: "",
       rate: "",
       text: "",
@@ -20,12 +20,18 @@ class FeedbackContainer extends Component {
   }
 
   onHandleChange(event) {
-    console.log(event)
-    console.log(this.state.rate)
     this.setState({ [event.target.name]: event.target.value });
   }
 
   componentDidMount() {
+    axios
+      .get(
+        "http://localhost:8099/HelpDesk/tickets/" + this.props.match.params.id,
+        JSON.parse(localStorage.AuthHeader)
+      )
+      .then((response) => {
+        this.setState({ ticket: response.data });
+      });
     axios
       .get(
         "http://localhost:8099/HelpDesk/tickets/" +
@@ -34,7 +40,6 @@ class FeedbackContainer extends Component {
         JSON.parse(localStorage.AuthHeader)
       )
       .then((response) => {
-        console.log(response.data);
         this.setState({ feedback: response.data });
       });
   }
@@ -48,9 +53,8 @@ class FeedbackContainer extends Component {
         { name: this.state.name, text: this.state.text, rate: this.state.rate },
         JSON.parse(localStorage.AuthHeader)
       )
-      .then((resp) => {
-        console.log(resp.data);
-        history.push("/tickets/"+this.props.match.params.id+"/");
+      .then(() => {
+        history.push("/tickets/" + this.props.match.params.id + "/");
       });
   }
 
@@ -66,13 +70,14 @@ class FeedbackContainer extends Component {
       return (
         <div>
           <FeedbackNewView
-                id={this.state.id}
-                name={this.state.name}
-                rate={this.state.rate}
-                text={this.state.text}
+            id={this.state.id}
+            name={this.state.name}
+            rate={this.state.rate}
+            text={this.state.text}
             textForm="Please, rate your satisfaction with the solution:"
             onHandleChange={this.onHandleChange}
             onAddFeedback={this.onAddFeedback}
+            ticket={this.state.ticket}
           />
         </div>
       );
@@ -82,6 +87,7 @@ class FeedbackContainer extends Component {
           <FeedbackView
             feedback={this.state.feedback}
             textForm="Feedback"
+            ticket={this.state.ticket}
           />
         </div>
       );

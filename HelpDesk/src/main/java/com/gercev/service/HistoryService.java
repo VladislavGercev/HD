@@ -37,72 +37,103 @@ public class HistoryService {
     }
 
     public Optional<History> addCreateTicketHistory(Ticket ticket, User user) {
-        History history = prepareHistory(ticket, user,
-                TICKET_IS_CREATED,
-                TICKET_IS_CREATED);
-        history.setId(historyRepository.addHistory(history)
-                .orElseThrow(() -> new HistoryIsNotCreatedException(
-                        "Create_History for ticket " + ticket.getId() + "isn't created")));
-        return Optional.of(history);
+
+        try {
+            History history = prepareHistory(ticket, user,
+                    TICKET_IS_CREATED,
+                    TICKET_IS_CREATED);
+            history.setId(historyRepository.addHistory(history)
+                    .orElseThrow(() -> new HistoryIsNotCreatedException(
+                            "Create_History for ticket " + ticket.getId() + "isn't created")));
+            return Optional.of(history);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     public Optional<History> addTicketEditHistory(Ticket ticket, User user) {
-        if (ticket.getState() == State.NEW) {
-            return addStatusChangedHistoryFromDraftToNew(ticket, user);
-        } else {
-            History history = prepareHistory(ticket, user,
-                    TICKET_IS_EDITED,
-                    TICKET_IS_EDITED);
-            history.setId(historyRepository.addHistory(history)
-                    .orElseThrow(() -> new HistoryIsNotCreatedException(
-                            "Ticket_change status History for ticket " + ticket.getId() + " isn't created")));
-            return Optional.of(history);
+        try {
+            if (ticket.getState() == State.NEW) {
+                return addStatusChangedHistoryFromDraftToNew(ticket, user);
+            } else {
+                History history = prepareHistory(ticket, user,
+                        TICKET_IS_EDITED,
+                        TICKET_IS_EDITED);
+                history.setId(historyRepository.addHistory(history)
+                        .orElseThrow(() -> new HistoryIsNotCreatedException(
+                                "Ticket_change status History for ticket " + ticket.getId() + " isn't created")));
+                return Optional.of(history);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return Optional.empty();
     }
 
 
     public Optional<History> addUpdateTicketStatusHistory(Ticket ticket, User user, State stateFrom, State stateTo) {
-        History history = prepareHistory(ticket, user,
-                TICKET_STATUS_IS_CHANGED,
-                String.format(TICKET_STATUS_IS_CHANGED +
-                        " from '%s' to '%s'", stateFrom.name(), stateTo.name()));
-        history.setId(historyRepository.addHistory(history).orElseThrow(() -> new HistoryIsNotCreatedException(
-                "Ticket_change status History for ticket " + ticket.getId() + " isn't created")));
-        return Optional.of(history);
+        try {
+            History history = prepareHistory(ticket, user,
+                    TICKET_STATUS_IS_CHANGED,
+                    String.format(TICKET_STATUS_IS_CHANGED +
+                            " from '%s' to '%s'", stateFrom.name(), stateTo.name()));
+            history.setId(historyRepository.addHistory(history).orElseThrow(() -> new HistoryIsNotCreatedException(
+                    "Ticket_change status History for ticket " + ticket.getId() + " isn't created")));
+            return Optional.of(history);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     private Optional<History> addStatusChangedHistoryFromDraftToNew(Ticket ticket, User user) {
-        History history = prepareHistory(ticket, user,
-                TICKET_STATUS_IS_CHANGED,
-                TICKET_STATUS_IS_CHANGED
-                        + " from 'DRAFT' to 'NEW'");
-        history.setId(historyRepository.addHistory(history)
-                .orElseThrow(() -> new HistoryIsNotCreatedException(
-                        "Ticket_change status History for ticket " + ticket.getId() + " isn't created")));
-        return Optional.of(history);
+        try {
+            History history = prepareHistory(ticket, user,
+                    TICKET_STATUS_IS_CHANGED,
+                    TICKET_STATUS_IS_CHANGED
+                            + " from 'DRAFT' to 'NEW'");
+            history.setId(historyRepository.addHistory(history)
+                    .orElseThrow(() -> new HistoryIsNotCreatedException(
+                            "Ticket_change status History for ticket " + ticket.getId() + " isn't created")));
+            return Optional.of(history);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     public Optional<History> addAttachment(Attachment attachment) {
-        History history =
-                prepareHistory(attachment,
-                        FILE_IS_ATTACHED,
-                        String.format(FILE_IS_ATTACHED
-                                + " : %s", attachment.getName()));
-        history.setId(historyRepository.addHistory(history)
-                .orElseThrow(() -> new HistoryIsNotCreatedException(
-                        "Attachment_add History for " + attachment.getName() + " isn't created")));
-        return Optional.of(history);
+        try {
+            History history =
+                    prepareHistory(attachment,
+                            FILE_IS_ATTACHED,
+                            String.format(FILE_IS_ATTACHED
+                                    + " : %s", attachment.getName()));
+            history.setId(historyRepository.addHistory(history)
+                    .orElseThrow(() -> new HistoryIsNotCreatedException(
+                            "Attachment_add History for " + attachment.getName() + " isn't created")));
+            return Optional.of(history);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     public Optional<History> removeAttachment(Attachment attachment) {
-        History history = prepareHistory(attachment,
-                FILE_IS_REMOVED,
-                String.format(FILE_IS_REMOVED
-                        + " : %s", attachment.getName()));
-        history.setId(historyRepository.addHistory(history)
-                .orElseThrow(() -> new HistoryIsNotCreatedException(
-                        "Attachment_remove History " + attachment.getName() + " isn't created")));
-        return Optional.of(history);
+        try {
+            History history = prepareHistory(attachment,
+                    FILE_IS_REMOVED,
+                    String.format(FILE_IS_REMOVED
+                            + " : %s", attachment.getName()));
+            history.setId(historyRepository.addHistory(history)
+                    .orElseThrow(() -> new HistoryIsNotCreatedException(
+                            "Attachment_remove History " + attachment.getName() + " isn't created")));
+            return Optional.of(history);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     private History prepareHistory(Ticket ticket, User user, String action, String description) {

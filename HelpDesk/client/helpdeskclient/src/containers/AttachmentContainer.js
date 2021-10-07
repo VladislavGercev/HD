@@ -5,7 +5,6 @@ import FileSaver from "file-saver";
 class AttachmentContainer extends React.Component {
   constructor(props) {
     super(props);
-    // this.onGetFileType = this.onGetFileType.bind(this);
     this.state = {
       ticketId: this.props.match.params.ticketId,
       attachmentId: this.props.match.params.attachmentId,

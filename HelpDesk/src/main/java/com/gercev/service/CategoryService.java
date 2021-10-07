@@ -15,6 +15,10 @@ public class CategoryService {
     @Autowired
     public CategoryRepository categoryRepository;
 
+    public CategoryService(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
+
     public Optional<Long> addCategory(Category category) {
         return categoryRepository.addCategory(category);
     }

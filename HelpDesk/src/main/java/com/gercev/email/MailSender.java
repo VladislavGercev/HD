@@ -23,12 +23,6 @@ public class MailSender {
     @Autowired
     private TemplateEngine htmlTemplateEngine;
 
-//    @Autowired
-//    public MailSender(JavaMailSender mailSender, TemplateEngine htmlTemplateEngine) {
-//        this.mailSender = mailSender;
-//        this.htmlTemplateEngine = htmlTemplateEngine;
-//    }
-
     public void sendAcceptableEmail(List<User> recipients, Long id, EmailTemplate emailTemplate) {
         MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");

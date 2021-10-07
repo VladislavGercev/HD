@@ -18,13 +18,9 @@ class Comment extends React.Component {
           </thead>
           <tbody>
             {this?.props?.comments.map((comment) => (
-              <tr>
+              <tr key={comment.id}>
                 <td>
-                  {comment.date.dayOfMonth +
-                    "/" +
-                    comment.date.monthValue +
-                    "/" +
-                    comment.date.year}
+                {comment.date!==null?comment.date[0]+"/" +comment.date[1]+"/"+comment.date[2]:""}
                 </td>
                 <td>
                   {comment?.user?.firstName + "  " + comment?.user?.lastName}

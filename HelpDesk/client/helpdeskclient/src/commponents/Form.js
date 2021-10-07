@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 
 class Form extends React.Component {
   constructor(props) {
@@ -25,8 +26,7 @@ class Form extends React.Component {
                   value={this.props.category}
                   onChange={onHandleChange}
                 >
-                  <option></option>
-                  <option>Application & Services</option>
+                  <option selected>Application & Services</option>
                   <option>Benefits & Paper Work</option>
                   <option>Hardware & Software</option>
                   <option>People Management</option>
@@ -66,7 +66,6 @@ class Form extends React.Component {
                 />
               </div>
             </div>
-
             <div class="row my-3">
               <div class="col-4">
                 <label>
@@ -80,11 +79,10 @@ class Form extends React.Component {
                   value={this.props.urgency}
                   onChange={onHandleChange}
                 >
-                  <option></option>
-                  <option>CRITICAL</option>
-                  <option>HIGH</option>
+                  <option selected>LOW</option>
                   <option>AVERAGE</option>
-                  <option>LOW</option>
+                  <option>HIGH</option>
+                  <option>CRITICAL</option>
                 </select>
               </div>
             </div>
@@ -126,27 +124,16 @@ class Form extends React.Component {
               <div>
                 {this.props.attachments &&
                   this.props.attachments.map((a) => (
-                    <div>
-                      <a
-                        href={
-                          "/tickets/" +
-                          this.props.ticketId +
-                          "/attachments/" +
-                          a.id
-                        }
-                        class="d-block"
-                        target="_blank"
-                      >
-                        {a.name}
-                      </a>
+                    <span className="w-10">
+                      {a.name + " "}
                       <button
-                        className="btn btn-secondary outlined w-15"
+                        className="btn btn-secondary outlined w-15 my-5"
                         type="button"
-                        onClick={() => this.props.onDeleteFile(a.name)}
+                        onClick={() => this.props.onDeleteFile(a.id, a.name)}
                       >
                         <span aria-hidden="true">&times;</span>
                       </button>
-                    </div>
+                    </span>
                   ))}
               </div>
             </div>

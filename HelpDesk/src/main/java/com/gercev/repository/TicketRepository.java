@@ -80,7 +80,7 @@ public class TicketRepository {
 
     public boolean updateTicket(Ticket ticket) {
         try {
-            sessionFactory.getCurrentSession().update(ticket);
+            sessionFactory.getCurrentSession().merge(ticket);
             return true;
         } catch (Exception e) {
             return false;

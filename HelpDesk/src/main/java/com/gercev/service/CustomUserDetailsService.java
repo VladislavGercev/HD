@@ -21,12 +21,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserService userService;
 
-//    @Autowired
-//    public CustomUserDetailsService(UserRepository userRepository, UserService userService) {
-//        this.userRepository = userRepository;
-//        this.userService = userService;
-//    }
-
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

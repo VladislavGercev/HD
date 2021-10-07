@@ -1,14 +1,17 @@
 package com.gercev.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gercev.domain.enums.State;
 import com.gercev.domain.enums.Urgency;
+
+import java.time.LocalDate;
 
 public class TicketDto {
     private Long id;
     private String name;
     private String description;
-    private String createOn;
-    private String desiredResolutionDate;
+    private LocalDate createdOn;
+    private LocalDate desiredResolutionDate;
     private State state;
     private Urgency urgency;
     private UserDto assignee;
@@ -68,19 +71,19 @@ public class TicketDto {
         this.description = description;
     }
 
-    public String getCreateOn() {
-        return createOn;
+    public LocalDate getCreatedOn() {
+        return createdOn;
     }
 
-    public void setCreateOn(String createOn) {
-        this.createOn = createOn;
+    public void setCreatedOn(LocalDate createdOn) {
+        this.createdOn = createdOn;
     }
 
-    public String getDesiredResolutionDate() {
+    public LocalDate getDesiredResolutionDate() {
         return desiredResolutionDate;
     }
 
-    public void setDesiredResolutionDate(String desiredResolutionDate) {
+    public void setDesiredResolutionDate(LocalDate desiredResolutionDate) {
         this.desiredResolutionDate = desiredResolutionDate;
     }
 

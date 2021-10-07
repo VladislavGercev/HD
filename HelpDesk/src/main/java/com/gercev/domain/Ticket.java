@@ -1,6 +1,5 @@
 package com.gercev.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gercev.domain.enums.State;
 import com.gercev.domain.enums.Urgency;
 
@@ -48,7 +47,7 @@ public class Ticket {
     @JoinColumn(name="approver")
     private User approver;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="category")
     private Category category;
 

@@ -20,7 +20,7 @@ class FeedbackNewView extends Component {
         <div class="container w-50 my-5">
           <div class="mb-5">
             <span class="h3">
-              Ticket ({this.props.id}) - {this.props.name}
+              Ticket ({this.props.ticket.id}) - {this.props.ticket.name}
             </span>
           </div>
           <div class="mb-4">

@@ -2,6 +2,7 @@ package com.gercev.dto;
 
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class CommentDto {
     private Long id;
@@ -52,5 +53,20 @@ public class CommentDto {
 
     public void setUser(UserDto user) {
         this.user = user;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommentDto that = (CommentDto) o;
+        return Objects.equals(id, that.id) && Objects.equals(date, that.date) &&
+                Objects.equals(text, that.text) && Objects.equals(ticketDto, that.ticketDto)
+                && Objects.equals(user, that.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, date, text, ticketDto, user);
     }
 }

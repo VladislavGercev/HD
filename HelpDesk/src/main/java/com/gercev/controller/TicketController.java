@@ -16,8 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("tickets")
@@ -43,7 +42,6 @@ public class TicketController {
                 .stream()
                 .map(ticketConverter::convert)
                 .toArray())).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-
     }
 
     @GetMapping("/{id}")
@@ -55,26 +53,16 @@ public class TicketController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addTicket(@RequestParam(value = "files", required = false) CommonsMultipartFile[] files,
-                                       @RequestParam(value = "ticketDto") String ticketJson, Principal principal) {
-        Optional<Ticket> ticketOptional = ticketService.addTicket(ticketConverter.convert(ticketJson), files, principal.getName());
+    public ResponseEntity<?> addTicket(@RequestBody TicketDto ticketDto, Principal principal) {
+        Optional<Ticket> ticketOptional = ticketService.addTicket(ticketDto, principal.getName());
         return ticketOptional.isPresent()
                 ? new ResponseEntity<>(ticketConverter.convert(ticketOptional.get()), HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<?> editTicket(@RequestParam(value = "files", required = false) CommonsMultipartFile[] files,
-//                                        @RequestParam(value = "ticketDto",required = false) String ticketJson, Principal principal) {
-//        return ticketService.updateTicket(principal.getName(), ticketConverter.convert(ticketJson))
-//                ? new ResponseEntity<>(HttpStatus.OK)
-//                : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//    }
-
-
     @PutMapping("/{id}")
-    public ResponseEntity<?> editTicket(@RequestBody String ticketJson, Principal principal) {
-        return ticketService.updateTicket(principal.getName(), ticketConverter.convert(ticketJson))
+    public ResponseEntity<?> updateTicket(@RequestBody TicketDto ticketDto, Principal principal) {
+        return ticketService.updateTicket(principal.getName(), ticketConverter.convert(ticketDto))
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
